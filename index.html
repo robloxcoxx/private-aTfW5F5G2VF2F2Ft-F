@@ -3,462 +3,653 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AURA | Премиум Магазин</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <title>ZeroTier Studio | Premium Web Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #ffffff;
-            --bg-color: #0a0a0a;
-            --accent: #ff4757;
-            --text-gray: #a4b0be;
-            --glass-bg: rgba(10, 10, 10, 0.7);
-            --card-bg: #151515;
-            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --bg-base: #030712;
+            --primary: #8b5cf6;
+            --primary-glow: rgba(139, 92, 246, 0.4);
+            --secondary: #06b6d4;
+            --accent: #f43f5e;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --glass-bg: rgba(17, 24, 39, 0.55);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-border-hover: rgba(139, 92, 246, 0.5);
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Montserrat', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             scroll-behavior: smooth;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--primary);
+            background-color: var(--bg-base);
+            color: var(--text-main);
             overflow-x: hidden;
+            min-height: 100vh;
         }
 
-        /* --- Навигация (Шапка) --- */
-        header {
+        /* --- Анимированный векторный фон --- */
+        .bg-canvas {
             position: fixed;
-            top: 0; left: 0; width: 100%;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+            background: #030712;
+        }
+
+        .bg-grid {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.7;
+        }
+
+        .glow-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(130px);
+            opacity: 0.45;
+            animation: floatOrb 20s infinite alternate ease-in-out;
+        }
+        .orb-1 { width: 550px; height: 550px; background: var(--primary); top: -15%; left: -10%; }
+        .orb-2 { width: 650px; height: 650px; background: var(--secondary); bottom: -20%; right: -10%; animation-delay: -8s; }
+        .orb-3 { width: 450px; height: 450px; background: var(--accent); top: 35%; left: 55%; animation-delay: -14s; opacity: 0.2; }
+
+        @keyframes floatOrb {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            50% { transform: translate(100px, 90px) scale(1.15) rotate(180deg); }
+            100% { transform: translate(-80px, 120px) scale(0.9) rotate(360deg); }
+        }
+
+        .container {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* --- Навигация --- */
+        header {
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+            margin-bottom: 30px;
+        }
+        .header-glass {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            padding: 14px 28px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 50px;
-            z-index: 1000;
-            transition: var(--transition);
-            border-bottom: 1px solid transparent;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
         }
-        /* Класс, который добавляется при скролле (JS) */
-        header.scrolled {
-            background: var(--glass-bg);
-            backdrop-filter: blur(15px);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding: 15px 50px;
-        }
-
         .logo {
-            font-size: 28px;
-            font-weight: 900;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            cursor: pointer;
-        }
-        .logo span { color: var(--accent); }
-
-        .nav-links {
-            display: flex;
-            gap: 30px;
-            list-style: none;
-        }
-        .nav-links a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: var(--transition);
-        }
-        .nav-links a:hover { color: var(--accent); }
-
-        .cart-btn {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: #fff;
-            padding: 10px 20px;
-            border-radius: 30px;
-            cursor: pointer;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
             font-weight: 700;
-            transition: var(--transition);
+            color: #fff;
+            text-decoration: none;
             display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo-badge {
+            width: 12px; height: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            box-shadow: 0 0 12px var(--primary);
+        }
+
+        .nav-actions { display: flex; gap: 12px; align-items: center; }
+
+        /* Кнопки */
+        .btn {
+            background: var(--glass-bg);
+            color: var(--text-main);
+            border: 1px solid var(--glass-border);
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
             align-items: center;
             gap: 8px;
+            text-decoration: none;
         }
-        .cart-btn:hover {
-            background: var(--primary);
-            color: #000;
+        .btn:hover {
+            border-color: var(--glass-border-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.25);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #6d28d9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            box-shadow: 0 10px 30px var(--primary-glow);
+        }
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 35px var(--primary-glow);
+            background: linear-gradient(135deg, #a78bfa, var(--primary));
         }
 
-        /* --- Главный экран (Landing Hero) --- */
+        /* --- Hero Главный экран --- */
         .hero {
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            padding: 80px 0 60px;
             text-align: center;
             position: relative;
-            /* Безопасный фон с Unsplash */
-            background: url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2560&auto=format&fit=crop') center/cover no-repeat;
         }
-        .hero-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, var(--bg-color) 100%);
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(139, 92, 246, 0.12);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: #c4b5fd;
+            margin-bottom: 25px;
+            backdrop-filter: blur(10px);
         }
-        .hero-content {
-            position: relative;
-            z-index: 10;
-            max-width: 800px;
-            padding: 0 20px;
-            animation: fadeIn 1s ease-out forwards;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
+        .status-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981; }
+        
         .hero h1 {
-            font-size: 5rem;
-            font-weight: 900;
-            line-height: 1.1;
-            margin-bottom: 20px;
-            text-transform: uppercase;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 4.2rem;
+            font-weight: 700;
+            line-height: 1.08;
+            margin-bottom: 24px;
+            letter-spacing: -1px;
+        }
+        .hero h1 span {
+            background: linear-gradient(135deg, #fff 30%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero h1 .highlight {
+            background: linear-gradient(135deg, #c4b5fd 0%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         .hero p {
             font-size: 1.2rem;
-            color: var(--text-gray);
-            margin-bottom: 40px;
+            color: var(--text-muted);
+            max-width: 650px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
         }
-        .btn-shop {
-            background: var(--accent);
-            color: #fff;
-            padding: 18px 45px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            border: none;
-            border-radius: 50px;
-            text-transform: uppercase;
+
+        /* --- Фильтры --- */
+        .filter-bar {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 45px;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-muted);
+            border: 1px solid var(--glass-border);
+            padding: 10px 24px;
+            border-radius: 30px;
             cursor: pointer;
+            font-weight: 600;
             transition: var(--transition);
-            box-shadow: 0 10px 30px rgba(255, 71, 87, 0.3);
         }
-        .btn-shop:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(255, 71, 87, 0.5);
-            background: #ff6b81;
+        .filter-btn.active, .filter-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-color: var(--secondary);
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.25);
         }
 
-        /* --- Секция Магазина (Товары) --- */
-        .store-section {
-            padding: 100px 50px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        .section-title {
-            text-align: center;
-            font-size: 3rem;
-            font-weight: 900;
-            margin-bottom: 60px;
-            text-transform: uppercase;
-        }
-        
-        .products-grid {
+        /* --- Сетка Карточек Проектов --- */
+        .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 40px;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 32px;
+            padding-bottom: 100px;
         }
-
-        .product-card {
-            background: var(--card-bg);
-            border-radius: 20px;
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
             overflow: hidden;
-            position: relative;
-            border: 1px solid rgba(255,255,255,0.05);
+            backdrop-filter: blur(20px);
             transition: var(--transition);
-        }
-        .product-card:hover {
-            transform: translateY(-10px);
-            border-color: rgba(255,255,255,0.2);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
-        }
-
-        .product-img-wrapper {
-            width: 100%;
-            height: 350px;
-            overflow: hidden;
+            display: flex;
+            flex-direction: column;
             position: relative;
         }
-        /* Безопасные фото товаров (Unsplash) */
-        .product-img {
+        .card:hover {
+            transform: translateY(-10px);
+            border-color: var(--glass-border-hover);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(139, 92, 246, 0.25);
+        }
+
+        .card-img-holder {
+            width: 100%;
+            height: 220px;
+            position: relative;
+            overflow: hidden;
+        }
+        .card-img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             transition: transform 0.6s ease;
         }
-        .product-card:hover .product-img {
-            transform: scale(1.1); /* Увеличение картинки при наведении */
-        }
-        
-        .badge {
+        .card:hover .card-img { transform: scale(1.08); }
+        .card-tag-badge {
             position: absolute;
             top: 15px; left: 15px;
-            background: var(--accent);
-            color: #fff;
-            padding: 5px 15px;
-            font-size: 0.8rem;
+            background: rgba(3, 7, 18, 0.75);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            color: var(--secondary);
+            font-size: 0.75rem;
             font-weight: 700;
-            border-radius: 30px;
             text-transform: uppercase;
-            z-index: 2;
+            padding: 6px 14px;
+            border-radius: 30px;
         }
 
-        .product-info {
-            padding: 25px;
+        .card-body {
+            padding: 26px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
         }
-        .product-category {
-            color: var(--text-gray);
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-            letter-spacing: 1px;
-        }
-        .product-title {
+        .card-title {
+            font-family: 'Space Grotesk', sans-serif;
             font-size: 1.4rem;
-            font-weight: 700;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
+            color: #fff;
         }
-        .product-bottom {
+        .card-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 24px;
+            flex-grow: 1;
+        }
+        .card-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            padding-top: 20px;
         }
-        .price {
-            font-size: 1.6rem;
-            font-weight: 900;
-            color: #fff;
-        }
-        .add-to-cart {
-            background: transparent;
-            color: #fff;
-            border: 2px solid var(--primary);
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        .add-to-cart:hover {
-            background: var(--primary);
-            color: #000;
-        }
+        .card-price { font-size: 1.6rem; font-weight: 800; color: #fff; }
 
-        /* --- Всплывающее уведомление корзины --- */
+        /* --- Выезжающая Корзина (Drawer) --- */
+        .drawer-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px);
+            z-index: 1000; opacity: 0; pointer-events: none; transition: var(--transition);
+        }
+        .drawer-overlay.active { opacity: 1; pointer-events: all; }
+
+        .drawer {
+            position: fixed; top: 0; right: -460px; width: 440px; height: 100vh;
+            background: rgba(15, 23, 42, 0.96);
+            backdrop-filter: blur(25px);
+            border-left: 1px solid var(--glass-border);
+            z-index: 1001; padding: 35px; display: flex; flex-direction: column;
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: -20px 0 50px rgba(0,0,0,0.8);
+        }
+        .drawer.active { right: 0; }
+        .drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .drawer-header h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem; }
+
+        .cart-list { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+        .cart-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            padding: 16px; border-radius: var(--radius-md);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .cart-item-title { font-weight: 600; font-size: 1rem; }
+        .cart-item-price { color: var(--secondary); font-weight: 700; margin-top: 4px; }
+        .cart-item-del { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 1.2rem; transition: 0.2s; }
+        .cart-item-del:hover { transform: scale(1.2); }
+
+        /* --- Модальное окно с интерактивным превью --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(12px);
+            z-index: 2000; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: var(--transition);
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal-box {
+            background: #0f172a;
+            border: 1px solid var(--glass-border-hover);
+            border-radius: var(--radius-lg);
+            overflow: hidden; width: 90%; max-width: 650px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 40px var(--primary-glow);
+            transform: translateY(30px); transition: var(--transition);
+            position: relative;
+        }
+        .modal-overlay.active .modal-box { transform: translateY(0); }
+        .modal-img { width: 100%; height: 260px; object-fit: cover; }
+        .modal-content { padding: 30px; }
+        .modal-close { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.6); border: 1px solid var(--glass-border); color: #fff; width: 36px; height: 36px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; backdrop-filter: blur(5px); }
+
+        /* --- Всплывающие уведомления --- */
+        .toast-wrapper {
+            position: fixed; bottom: 30px; right: 30px;
+            display: flex; flex-direction: column; gap: 12px; z-index: 3000;
+        }
         .toast {
-            position: fixed;
-            bottom: -100px;
-            right: 30px;
-            background: var(--primary);
-            color: #000;
-            padding: 15px 30px;
-            border-radius: 12px;
-            font-weight: 700;
-            box-shadow: 0 10px 30px rgba(255,255,255,0.2);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 2000;
+            background: #ffffff; color: #000;
+            padding: 14px 24px; border-radius: 50px;
+            font-weight: 700; font-size: 0.92rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
-        .toast.show { bottom: 30px; }
+        @keyframes toastIn { from { transform: translateY(100%) scale(0.9); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
 
-        /* Подвал */
         footer {
-            background: #050505;
-            padding: 60px 50px;
-            text-align: center;
-            border-top: 1px solid rgba(255,255,255,0.05);
+            border-top: 1px solid var(--glass-border);
+            padding: 40px 0; text-align: center;
+            color: var(--text-muted); font-size: 0.95rem;
+            background: rgba(3, 7, 18, 0.9);
         }
-        footer p { color: var(--text-gray); margin-bottom: 20px; }
 
-        /* Адаптивность для телефонов */
         @media (max-width: 768px) {
-            header { padding: 15px 20px; }
-            .nav-links { display: none; } /* Прячем меню на мобилках */
-            .hero h1 { font-size: 3rem; }
-            .hero p { font-size: 1rem; }
-            .store-section { padding: 60px 20px; }
+            .hero h1 { font-size: 2.8rem; }
+            .header-glass { padding: 10px 18px; }
+            .drawer { width: 100%; right: -100%; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Шапка (Header) -->
-    <header id="header">
-        <div class="logo">AU<span>RA</span></div>
-        <ul class="nav-links">
-            <li><a href="#home">Главная</a></li>
-            <li><a href="#catalog">Каталог</a></li>
-            <li><a href="#about">О нас</a></li>
-        </ul>
-        <button class="cart-btn" onclick="document.getElementById('catalog').scrollIntoView()">
-            🛒 Корзина: <span id="cart-count">0</span>
-        </button>
-    </header>
+    <!-- Векторный фоновый холст -->
+    <div class="bg-canvas">
+        <div class="bg-grid"></div>
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="glow-orb orb-3"></div>
+    </div>
 
-    <!-- Главный экран (Landing) -->
-    <section class="hero" id="home">
-        <div class="hero-overlay"></div>
-        <div class="hero-content">
-            <h1>Будущее стиля</h1>
-            <p>Премиальная одежда и гаджеты. Эксклюзивные коллекции без переплат. Листай вниз, чтобы увидеть новинки этого сезона.</p>
-            <button class="btn-shop" onclick="document.getElementById('catalog').scrollIntoView()">
-                Смотреть каталог
-            </button>
-        </div>
-    </section>
+    <!-- Уведомления -->
+    <div class="toast-wrapper" id="toastWrapper"></div>
 
-    <!-- Секция магазина (Товары) -->
-    <section class="store-section" id="catalog">
-        <h2 class="section-title">Новые поступления</h2>
-        
-        <div class="products-grid">
+    <div class="container">
+        <!-- Навигационная шапка -->
+        <header>
+            <div class="header-glass">
+                <a href="#" class="logo">
+                    <div class="logo-badge"></div>
+                    ZeroTier
+                </a>
+
+                <div class="nav-actions">
+                    <button class="btn" onclick="copyContact()">
+                        🔗 Скопировать профиль
+                    </button>
+                    <button class="btn btn-primary" onclick="toggleCart()">
+                        🛒 Корзина (<span id="cartCounter">0</span>)
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Главный баннер -->
+        <section class="hero">
+            <div class="hero-badge">
+                <span class="status-dot"></span> Открыт к заказам | Портфолио 2026
+            </div>
+            <h1>Разрабатываю сайты,<br>которые <span>выделяют</span> и <span class="highlight">продают</span></h1>
+            <p>Премиальный веб-дизайн, чистый код без тяжелых конструкторов и адаптивность под любые устройства. Ознакомьтесь с интерактивными примерами работ ниже.</p>
             
-            <!-- Товар 1 -->
-            <div class="product-card">
-                <div class="badge">Хит продаж</div>
-                <div class="product-img-wrapper">
-                    <!-- Безопасное фото наушников -->
-                    <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=600&auto=format&fit=crop" alt="Наушники" class="product-img">
-                </div>
-                <div class="product-info">
-                    <div class="product-category">Аудио</div>
-                    <h3 class="product-title">AURA Studio Pro 3</h3>
-                    <div class="product-bottom">
-                        <div class="price">12 500 ₽</div>
-                        <button class="add-to-cart" onclick="addToCart('AURA Studio Pro 3')">Купить</button>
-                    </div>
-                </div>
+            <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                <button class="btn btn-primary" onclick="document.getElementById('catalog').scrollIntoView()">
+                    ⚡ Смотреть каталог
+                </button>
+                <!-- Ссылка обновлена на твою настоящую -->
+                <a href="https://funpay.com/users/12127864/" target="_blank" class="btn">
+                    💬 Заказать на FunPay
+                </a>
+            </div>
+        </section>
+
+        <!-- Каталог -->
+        <section id="catalog">
+            <div class="filter-bar">
+                <button class="filter-btn active" onclick="filterGrid('all', this)">Все концепты</button>
+                <button class="filter-btn" onclick="filterGrid('game', this)">🎮 Игровые (Rust/CS)</button>
+                <button class="filter-btn" onclick="filterGrid('promo', this)">🚀 TG & Визитки</button>
+                <button class="filter-btn" onclick="filterGrid('shop', this)">🛒 Магазины</button>
             </div>
 
-            <!-- Товар 2 -->
-            <div class="product-card">
-                <div class="badge" style="background: #2ed573;">Новинка</div>
-                <div class="product-img-wrapper">
-                    <!-- Безопасное фото часов -->
-                    <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=600&auto=format&fit=crop" alt="Часы" class="product-img">
-                </div>
-                <div class="product-info">
-                    <div class="product-category">Аксессуары</div>
-                    <h3 class="product-title">Titanium Smart Watch</h3>
-                    <div class="product-bottom">
-                        <div class="price">8 990 ₽</div>
-                        <button class="add-to-cart" onclick="addToCart('Titanium Smart Watch')">Купить</button>
+            <div class="grid" id="projectsGrid">
+                
+                <!-- Товар 1: Rust/Game -->
+                <div class="card" data-cat="game">
+                    <div class="card-img-holder">
+                        <span class="card-tag-badge">Rust / CS2 Project</span>
+                        <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=800&auto=format&fit=crop" class="card-img" alt="Gaming Site">
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title">Лендинг для Игрового Сервера</h3>
+                        <p class="card-desc">Промо-страница с агрессивным или неоновым стилем, блоками онлайна, правилами и витриной донат-привилегий.</p>
+                        <div class="card-footer">
+                            <div class="card-price">3 000 ₽</div>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-primary" onclick="addToCart('Лендинг Игрового Сервера', 3000)">+ В заказ</button>
+                                <button class="btn" onclick="openModal('Лендинг Игрового Сервера', 'Полноценный промо-сайт для серверов Rust или CS2. Включает адаптивную верстку, блоки онлайна, правила, галерею и витрину привилегий с быстрой кнопкой оплаты.', 'https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=800&auto=format&fit=crop')">👁️</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Товар 3 -->
-            <div class="product-card">
-                <div class="product-img-wrapper">
-                    <!-- Безопасное фото кроссовок -->
-                    <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600&auto=format&fit=crop" alt="Кроссовки" class="product-img">
-                </div>
-                <div class="product-info">
-                    <div class="product-category">Обувь</div>
-                    <h3 class="product-title">Neon Runner X1</h3>
-                    <div class="product-bottom">
-                        <div class="price">14 200 ₽</div>
-                        <button class="add-to-cart" onclick="addToCart('Neon Runner X1')">Купить</button>
+                <!-- Товар 2: TG / Taplink -->
+                <div class="card" data-cat="promo">
+                    <div class="card-img-holder">
+                        <span class="card-tag-badge">Telegram Marketing</span>
+                        <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop" class="card-img" alt="TG Promo">
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title">Taplink / Промо-визитка</h3>
+                        <p class="card-desc">Молниеносный сайт для рекламы и трафика. Собирает все ссылки, прайсы и отзывы проекта в один удобный адрес.</p>
+                        <div class="card-footer">
+                            <div class="card-price">1 250 ₽</div>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-primary" onclick="addToCart('Taplink / Промо-визитка', 1250)">+ В заказ</button>
+                                <button class="btn" onclick="openModal('Taplink / Промо-визитка', 'Идеальное решение для закупки рекламы в Telegram. Открывается мгновенно на любых телефонах. Включает аккуратные интерактивные кнопки, прайс-лист и плашки с отзывами клиентов.', 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop')">👁️</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Товар 4 -->
-            <div class="product-card">
-                <div class="badge" style="background: #ff4757;">-20%</div>
-                <div class="product-img-wrapper">
-                    <!-- Безопасное фото объектива/камеры -->
-                    <img src="https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?q=80&w=600&auto=format&fit=crop" alt="Камера" class="product-img">
-                </div>
-                <div class="product-info">
-                    <div class="product-category">Оптика</div>
-                    <h3 class="product-title">Retro Lens 50mm</h3>
-                    <div class="product-bottom">
-                        <div class="price" style="color: var(--accent);">5 400 ₽</div>
-                        <button class="add-to-cart" onclick="addToCart('Retro Lens 50mm')">Купить</button>
+                <!-- Товар 3: Магазин -->
+                <div class="card" data-cat="shop">
+                    <div class="card-img-holder">
+                        <span class="card-tag-badge">Digital Store</span>
+                        <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop" class="card-img" alt="Digital Store">
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title">Магазин цифровых товаров</h3>
+                        <p class="card-desc">Витрина аккаунтов, софта или дизайна. Эффекты Glassmorphism, рабочая боковая корзина и удобные категории.</p>
+                        <div class="card-footer">
+                            <div class="card-price">6 000 ₽</div>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-primary" onclick="addToCart('Магазин цифровых товаров', 6000)">+ В заказ</button>
+                                <button class="btn" onclick="openModal('Магазин цифровых товаров', 'Полноценная стильная витрина товаров. Поддержка категорий, боковой выезжающей корзины, динамического подсчёта стоимости и удобной переадресации на оплату.', 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop')">👁️</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
+            </div>
+        </section>
+    </div>
+
+    <!-- Выезжающая Корзина -->
+    <div class="drawer-overlay" id="drawerOverlay" onclick="toggleCart()"></div>
+    <div class="drawer" id="drawer">
+        <div class="drawer-header">
+            <h2>Корзина заказа</h2>
+            <button class="btn" onclick="toggleCart()">✕</button>
         </div>
-    </section>
+        
+        <div class="cart-list" id="cartList"></div>
 
-    <!-- Всплывающее уведомление (Toast) -->
-    <div class="toast" id="toast">
-        <span style="font-size: 1.5rem;">🛍️</span>
-        <div>
-            <div style="font-size: 0.8rem; color: #555;">Успешно</div>
-            <div id="toast-text">Товар добавлен в корзину!</div>
+        <div style="margin-top: auto; padding-top: 25px; border-top: 1px solid var(--glass-border);">
+            <div style="display: flex; justify-content: space-between; font-size: 1.5rem; font-weight: 800; margin-bottom: 20px;">
+                <span>Итого:</span>
+                <span id="cartTotalSum" style="color: var(--secondary);">0 ₽</span>
+            </div>
+            <!-- Ссылка обновлена на твою настоящую -->
+            <a href="https://funpay.com/users/12127864/" target="_blank" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 16px;">
+                Оформить на FunPay
+            </a>
         </div>
     </div>
 
-    <!-- Подвал -->
-    <footer id="about">
-        <div class="logo" style="margin-bottom: 20px;">AU<span>RA</span></div>
-        <p>© 2026 AURA Store. Демонстрационный проект магазина.</p>
-        <p style="font-size: 0.8rem; opacity: 0.5;">Все изображения предоставлены по лицензии Unsplash (Free to use).</p>
-        <a href="https://funpay.com/users/20531102/" target="_blank" style="color: var(--primary); text-decoration: none; border-bottom: 1px solid var(--primary); margin-top: 10px; display: inline-block;">
-            Связаться с разработчиком
-        </a>
+    <!-- Модальное окно просмотра -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModalOnBg(event)">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeModal()">✕</button>
+            <img src="" id="modalImg" class="modal-img" alt="Preview">
+            <div class="modal-content">
+                <h3 id="modalTitle" style="font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem; margin-bottom: 12px; color: #fff;">Название</h3>
+                <p id="modalDesc" style="color: var(--text-muted); line-height: 1.6; margin-bottom: 25px;">Описание...</p>
+                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                    <button class="btn" onclick="closeModal()">Закрыть</button>
+                    <!-- Ссылка обновлена на твою настоящую -->
+                    <a href="https://funpay.com/users/12127864/" target="_blank" class="btn btn-primary">Заказать на FunPay</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>© 2026 ZeroTier Web Studio. Сделано специально для размещения на GitHub Pages.</p>
+        </div>
     </footer>
 
     <!-- JavaScript -->
     <script>
-        // 1. Анимация шапки при скролле (липкое матовое стекло)
-        const header = document.getElementById('header');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
+        // 1. Логика работы корзины
+        let cart = [];
+
+        function addToCart(title, price) {
+            cart.push({ id: Date.now(), title, price });
+            updateCartUI();
+            showToast(`🛒 "${title}" добавлен в корзину!`);
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(item => item.id !== id);
+            updateCartUI();
+            showToast(`❌ Удалено из корзины`);
+        }
+
+        function updateCartUI() {
+            document.getElementById('cartCounter').innerText = cart.length;
+            const container = document.getElementById('cartList');
+            const totalSum = document.getElementById('cartTotalSum');
+            container.innerHTML = '';
+
+            if (cart.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center; margin-top: 40px;">Корзина пока пуста</p>';
+                totalSum.innerText = '0 ₽';
+                return;
             }
-        });
 
-        // 2. Логика добавления в корзину
-        let cartTotal = 0;
-        const cartCountEl = document.getElementById('cart-count');
-        const toast = document.getElementById('toast');
-        const toastText = document.getElementById('toast-text');
-        let toastTimeout;
+            let sum = 0;
+            cart.forEach(item => {
+                sum += item.price;
+                const el = document.createElement('div');
+                el.className = 'cart-item';
+                el.innerHTML = `
+                    <div>
+                        <div class="cart-item-title">${item.title}</div>
+                        <div class="cart-item-price">${item.price.toLocaleString()} ₽</div>
+                    </div>
+                    <button class="cart-item-del" onclick="removeFromCart(${item.id})">🗑️</button>
+                `;
+                container.appendChild(el);
+            });
 
-        function addToCart(itemName) {
-            // Увеличиваем счетчик
-            cartTotal++;
-            cartCountEl.innerText = cartTotal;
+            totalSum.innerText = sum.toLocaleString() + ' ₽';
+        }
 
-            // Добавляем класс анимации для счетчика
-            cartCountEl.style.transform = 'scale(1.5)';
-            cartCountEl.style.color = 'var(--accent)';
-            setTimeout(() => {
-                cartCountEl.style.transform = 'scale(1)';
-                cartCountEl.style.color = 'inherit';
-            }, 300);
+        function toggleCart() {
+            document.getElementById('drawer').classList.toggle('active');
+            document.getElementById('drawerOverlay').classList.toggle('active');
+        }
 
-            // Показываем уведомление
-            toastText.innerText = itemName + ' в корзине!';
-            toast.classList.add('show');
+        // 2. Логика фильтров
+        function filterGrid(category, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
 
-            // Прячем уведомление через 3 секунды
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
+            document.querySelectorAll('.card').forEach(card => {
+                if (category === 'all' || card.dataset.cat === category) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // 3. Интерактивное модальное окно
+        function openModal(title, desc, imgSrc) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalDesc').innerText = desc;
+            document.getElementById('modalImg').src = imgSrc;
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        function closeModalOnBg(e) {
+            if (e.target.classList.contains('modal-overlay')) closeModal();
+        }
+
+        // 4. Скопировать профиль и Уведомления
+        function copyContact() {
+            navigator.clipboard.writeText("https://funpay.com/users/12127864/");
+            showToast("🔗 Ссылка на профиль FunPay скопирована!");
+        }
+
+        function showToast(msg) {
+            const wrapper = document.getElementById('toastWrapper');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerText = msg;
+            wrapper.appendChild(toast);
+            setTimeout(() => toast.remove(), 2800);
         }
     </script>
-
 </body>
 </html>
